@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  EDSEC Innovations Design System
+  Brand Color (Dark):  #14B8A6 (Teal-500)
+  Brand Color (Light): #0D9488 (Teal-600)
+  Dark  BG: #0B0F0F  |  Card: #121818  |  Text: #E6FFFA
+  Light BG: #FFFFFF  |  Card: #F0FDFA  |  Text: #0F172A
+*/
+
+@layer base {
+  :root {
+    /* DARK MODE (default) */
+    --background:   174 30%  6%;   /* #0B0F0F */
+    --foreground:   166 100% 95%;  /* #E6FFFA */
+    --card:         174 25%  9%;   /* #121818 */
+    --card-foreground: 166 100% 95%;
+    --popover:      174 25%  9%;
+    --popover-foreground: 166 100% 95%;
+    --primary:      174 75%  40%;  /* #14B8A6 */
+    --primary-foreground: 0 0% 100%;
+    --secondary:    174 55%  18%;
+    --secondary-foreground: 166 100% 95%;
+    --muted:        174 20%  13%;
+    --muted-foreground: 166 40%  65%;
+    --accent:       174 75%  40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive:  0 84.2% 60.2%;
+    --destructive-foreground: 166 100% 95%;
+    --border:       174 75% 40% / 0.18;
+    --input:        174 75% 40% / 0.13;
+    --ring:         174 75% 40%;
+    --radius:       0.75rem;
+    --gradient-primary: linear-gradient(135deg, #14B8A6, #0891B2);
+    --gradient-button-hover: linear-gradient(135deg, #0D9488, #0E7490);
+    --gradient-hero: linear-gradient(180deg, #0B0F0F 0%, #0D1515 50%, #0B0F0F 100%);
+    --gradient-section: linear-gradient(180deg, #0D1515 0%, #0B0F0F 100%);
+    --gradient-card: linear-gradient(145deg, #121818, #0F1818);
+  }
+
+  /* ── LIGHT MODE ─────────────────────────────────── */
+  html.light {
+    --background:   0 0% 100%;
+    --foreground:   220 50% 7%;    /* #0F172A */
+    --card:         166 80% 97%;   /* #F0FDFA */
+    --card-foreground: 220 50% 7%;
+    --popover:      0 0% 100%;
+    --popover-foreground: 220 50% 7%;
+    --primary:      174 68%  31%;  /* #0D9488 */
+    --primary-foreground: 0 0% 100%;
+    --secondary:    166 60%  92%;
+    --secondary-foreground: 220 50% 7%;
+    --muted:        166 40%  95%;
+    --muted-foreground: 217 19%  35%;
+    --accent:       174 68%  31%;
+    --accent-foreground: 0 0% 100%;
+    --destructive:  0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border:       174 68% 31% / 0.2;
+    --input:        174 68% 31% / 0.12;
+    --ring:         174 68% 31%;
+    --gradient-primary: linear-gradient(135deg, #0D9488, #0891B2);
+    --gradient-button-hover: linear-gradient(135deg, #0F766E, #0E7490);
+    --gradient-hero: linear-gradient(180deg, #FFFFFF 0%, #F0FDFA 50%, #FFFFFF 100%);
+    --gradient-section: linear-gradient(180deg, #F0FDFA 0%, #FFFFFF 100%);
+    --gradient-card: linear-gradient(145deg, #F0FDFA, #FFFFFF);
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', 'Poppins', sans-serif;
+    background: #0B0F0F;
+    color: #E6FFFA;
+    transition: background-color 0.35s ease, color 0.35s ease;
+  }
+  html.light body {
+    background: #FFFFFF;
+    color: #0F172A;
+  }
+
+  button { @apply transition-all duration-300; }
+  button:hover:not(:disabled) { @apply -translate-y-0.5; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-18px); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes tealPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(20,184,166,0.35); }
+    50%       { box-shadow: 0 0 36px rgba(20,184,166,0.65); }
+  }
+}
+
+@layer utilities {
+  .animate-float       { animation: float 6s ease-in-out infinite; }
+  .animate-fade-in-up  { animation: fadeInUp 0.6s ease-out both; }
+  .animate-teal-pulse  { animation: tealPulse 2.5s ease-in-out infinite; }
+
+  .bg-gradient-primary { background: var(--gradient-primary); }
+  .bg-gradient-section { background: var(--gradient-section); }
+  .bg-gradient-hero    { background: var(--gradient-hero); }
+  .bg-gradient-card    { background: var(--gradient-card); }
+
+  /* ── HOVER LIFT ─────────────────────────────── */
+  .hover-lift { @apply transition-all duration-500 ease-out; }
+  .hover-lift:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 0 25px rgba(20,184,166,0.5);
+  }
+  html.light .hover-lift:hover { box-shadow: 0 0 20px rgba(13,148,136,0.4); }
+
+  /* ── GLOW BUTTON ─────────────────────────────── */
+  .glow-button { @apply relative overflow-hidden; }
+  .glow-button::after {
+    content: '';
+    @apply absolute inset-0 opacity-0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+    translate: -100%;
+    transition: translate 0.6s ease, opacity 0.3s ease;
+  }
+  .glow-button:hover::after { @apply opacity-100; translate: 100%; }
+
+  /* ── GLASSMORPHISM ───────────────────────────── */
+  .glassmorphism {
+    background: rgba(20,184,166,0.05);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(20,184,166,0.12);
+  }
+
+  /* ── STRUCTURAL ──────────────────────────────── */
+  .section-alt-1 { background-color: #0B0F0F; }
+  html.light .section-alt-1 { background-color: #FFFFFF; }
+
+  .section-alt-2 { background-color: #0D1515; }
+  html.light .section-alt-2 { background-color: #F0FDFA; }
+
+  .section-alt-3 { background-color: #121818; }
+  html.light .section-alt-3 { background-color: #CCFBF1; }
+
+  .container-sudur {
+    max-width: 1200px; margin-left: auto; margin-right: auto;
+    padding-left: 24px; padding-right: 24px;
+  }
+
+  .card-sudur {
+    background: rgba(18,24,24,0.85);
+    border: 1px solid rgba(20,184,166,0.18);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+  }
+  html.light .card-sudur {
+    background: #F0FDFA;
+    border: 1px solid rgba(13,148,136,0.18);
+    box-shadow: 0 2px 12px rgba(13,148,136,0.06);
+  }
+
+  .section-padding { padding-top: 80px; padding-bottom: 80px; }
+
+  /* ── SCROLLBAR ───────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0B0F0F; }
+  ::-webkit-scrollbar-thumb { background: rgba(20,184,166,0.4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(20,184,166,0.7); }
+  html.light ::-webkit-scrollbar-track { background: #F0FDFA; }
+  html.light ::-webkit-scrollbar-thumb { background: rgba(13,148,136,0.35); }
+}
