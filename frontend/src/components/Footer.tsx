@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Linkedin, Youtube, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import logo from '@/assets/edsec-logo-new.png';
+import GoogleTranslate from './GoogleTranslate';
 
 const Footer = () => {
   const { isDark } = useTheme();
@@ -95,9 +96,11 @@ const Footer = () => {
 
         <div className={`border-t ${divider} mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-3 text-xs opacity-50`}>
           <p>© {new Date().getFullYear()} Edsec Innovations Pvt. Ltd. All Rights Reserved.</p>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <GoogleTranslate />
             <Link to="/privacy" className={link}>Privacy Policy</Link>
             <Link to="/terms" className={link}>Terms of Service</Link>
+            <Link to="/admin-login" className={`ml-2 text-xs font-semibold ${link} hover:text-[#14B8A6] opacity-30 hover:opacity-100 transition-opacity`}>Admin Portal</Link>
           </div>
         </div>
       </div>

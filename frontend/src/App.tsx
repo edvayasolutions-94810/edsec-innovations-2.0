@@ -16,6 +16,7 @@ import Enroll from "./pages/Enroll";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
+import ProtectedRoute from "./components/ProtectedRoute";
 import StudentLogin from "./pages/StudentLogin";
 import StudentDashboard from "./pages/StudentDashboard";
 import FloatingContact from "./components/FloatingContact";
@@ -46,9 +47,9 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/enroll" element={<Enroll />} />
 
-          {/* Direct Admin Route (Login Removed) */}
-          <Route path="/admin-login" element={<AdminDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          {/* Admin Routes */}
+          <Route path="/admin-login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
           {/* Student Routes */}
           <Route path="/student/login" element={<StudentLogin />} />
