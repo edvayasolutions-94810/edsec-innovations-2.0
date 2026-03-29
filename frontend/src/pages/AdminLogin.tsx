@@ -3,19 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Lock, Mail, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import API_URL from '@/services/api';
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('Please enter both email and password.');
+      toast.error('Please enter both username/email and password.');
       return;
     }
 
@@ -64,22 +65,22 @@ const AdminLogin = () => {
         {/* Card */}
         <div className="bg-[#0D1515] border border-[rgba(20,184,166,0.2)] rounded-2xl p-8 shadow-[0_0_40px_rgba(20,184,166,0.1)]">
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
+            {/* Email / Username */}
             <div>
               <label className="block text-sm font-medium text-[#99F6E4] mb-2">
-                Admin Email
+                Admin Username or Email
               </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#14B8A6]" />
                 <Input
-                  type="email"
+                  type="text"
                   id="admin-email"
-                  placeholder="admin@edsec.com"
+                  placeholder="Edsecinnovations"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.1)] text-[#F9FAFB] placeholder:text-[#6B7280] focus:border-[#14B8A6] h-11"
                   required
-                  autoComplete="email"
+                  autoComplete="username"
                 />
               </div>
             </div>
@@ -92,15 +93,22 @@ const AdminLogin = () => {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#14B8A6]" />
                 <Input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="admin-password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.1)] text-[#F9FAFB] placeholder:text-[#6B7280] focus:border-[#14B8A6] h-11"
+                  className="pl-10 pr-10 bg-[rgba(255,255,255,0.04)] border-[rgba(255,255,255,0.1)] text-[#F9FAFB] placeholder:text-[#6B7280] focus:border-[#14B8A6] h-11"
                   required
                   autoComplete="current-password"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#14B8A6] focus:outline-none transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
             </div>
 
