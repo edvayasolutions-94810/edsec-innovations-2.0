@@ -16,6 +16,11 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Root route for health check
+app.get('/', (req, res) => {
+    res.json({ status: 'online', message: 'EdSec API Backend is running successfully' });
+});
+
 // Routes
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/courses', require('./src/routes/courseRoutes'));
