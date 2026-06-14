@@ -273,11 +273,95 @@ const sendOnHoldEmail = async (student) => {
     }
 };
 
+const sendContactAdminEmail = async (contact) => {
+    try {
+        const transporter = getTransporter();
+        const adminEmail = process.env.ADMIN_EMAIL || 'edsecinnovations@gmail.com';
+        const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+        const mailOptions = {
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            to: adminEmail,
+            subject: `New Contact Form Submission – EdSec Innovations`,
+            html: `
+        <div style="font-family: Arial, sans-serif; max-width: 650px; margin: auto; padding: 25px; border: 1px solid #14b8a6; border-radius: 12px; background-color: #fafafa; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <h2 style="color: #0d9488; border-bottom: 2px solid #14b8a6; padding-bottom: 10px; margin-top: 0;">New Contact Form Message</h2>
+          <p style="color: #475569; font-size: 14px;">You have received a new message via the website contact form. Details below:</p>
+          
+          <table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%; border-color: #e2e8f0; font-size: 14px;">
+            <tr style="background-color: #f1f5f9; color: #1e293b;">
+              <th align="left" style="width: 35%;">Field</th>
+              <th align="left">Details</th>
+            </tr>
+            <tr>
+              <td><strong>Name</strong></td>
+              <td>${contact.name}</td>
+            </tr>
+            <tr>
+              <td><strong>Email</strong></td>
+              <td><a href="mailto:${contact.email}" style="color: #0d9488;">${contact.email}</a></td>
+            </tr>
+            <tr>
+              <td><strong>Phone</strong></td>
+              <td><a href="tel:${contact.phone}" style="color: #0d9488;">${contact.phone || 'Not Provided'}</a></td>
+            </tr>
+            <tr>
+              <td><strong>Message</strong></td>
+              <td>${contact.message}</td>
+            </tr>
+          </table>
+          <br>
+          <p style="font-size: 11px; color: #94a3b8; margin-bottom: 0;">Submitted on: ${dateStr}</p>
+        </div>
+      `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Contact admin email sent: %s', info.messageId);
+    } catch (error) {
+        console.error('Error sending contact admin email:', error);
+        throw error;
+    }
+};
+
+const sendContactUserEmail = async (contact) => {
+    try {
+        const transporter = getTransporter();
+        const mailOptions = {
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            to: contact.email,
+            subject: `Thank you for contacting EdSec Innovations`,
+            html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; line-height: 1.6;">
+          <h2 style="color: #0d9488; margin-top: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">Message Received</h2>
+          <p>Dear <strong>${contact.name}</strong>,</p>
+          <p>Thank you for reaching out to EdSec Innovations. We have successfully received your message and our team will get back to you shortly.</p>
+          <p>Here is a summary of what you submitted:</p>
+          <blockquote style="background-color: #f8fafc; border-left: 4px solid #14b8a6; padding: 15px; margin: 15px 0; font-style: italic; color: #475569;">
+            ${contact.message}
+          </blockquote>
+          <br>
+          <p style="margin-bottom: 0;">Regards,</p>
+          <p style="margin-top: 4px; font-weight: bold; color: #0d9488;">EdSec Innovations Team</p>
+        </div>
+      `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Contact user confirmation email sent: %s', info.messageId);
+    } catch (error) {
+        console.error('Error sending contact user confirmation email:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     sendEnrollmentEmail,
     sendAdminNotificationEmail,
     sendStudentConfirmationEmail,
     sendApprovalEmail,
     sendRejectionEmail,
-    sendOnHoldEmail
+    sendOnHoldEmail,
+    sendContactAdminEmail,
+    sendContactUserEmail
 };

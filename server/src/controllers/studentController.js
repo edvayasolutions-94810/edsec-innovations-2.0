@@ -10,7 +10,8 @@ const {
 } = require('../utils/emailService');
 const { 
     sendWhatsAppNotification,
-    sendStudentWhatsAppStatus 
+    sendStudentWhatsAppStatus,
+    sendStudentEnrollmentWhatsAppConfirmation
 } = require('../utils/whatsappService');
 
 // Helper function to trigger notifications asynchronously and catch individual errors so they do not block execution
@@ -29,11 +30,18 @@ const triggerNotifications = async (student) => {
         console.error('Email Error: Failed to send Student Confirmation Email:', err.message);
     }
 
-    // 3. Send WhatsApp Notification
+    // 3. Send WhatsApp Notification to Admin
     try {
         await sendWhatsAppNotification(student);
     } catch (err) {
         console.error('WhatsApp Error: Failed to send Admin WhatsApp Notification:', err.message);
+    }
+
+    // 4. Send WhatsApp Confirmation to Student
+    try {
+        await sendStudentEnrollmentWhatsAppConfirmation(student);
+    } catch (err) {
+        console.error('WhatsApp Error: Failed to send Student Enrollment WhatsApp Confirmation:', err.message);
     }
 };
 
