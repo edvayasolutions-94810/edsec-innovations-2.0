@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,11 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useTheme } from '@/contexts/ThemeContext';
+import logo from '@/assets/edsec-logo-new.png';
 import {
     Search, Download, Trash2, Eye, LayoutDashboard, Users, CreditCard, CheckCircle,
     LogOut, Edit, Plus, Mail, MessageSquare, Filter, X, ChevronRight, Clock, Award,
     BookOpen, AlertCircle, Calendar, MapPin, User, GraduationCap, DollarSign, UserCheck,
-    Settings, RefreshCw, Send, ArrowRight, Menu, FileText, Activity
+    Settings, RefreshCw, Send, ArrowRight, Menu, FileText, Activity, Sun, Moon
 } from 'lucide-react';
 
 const getApiUrl = () => {
@@ -106,10 +105,10 @@ interface CourseDb {
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const { isDark } = useTheme();
+    const { isDark, toggleTheme } = useTheme();
     
     // Tab Navigation State
-    const [activeTab, setActiveTab] = useState<'analytics' | 'crm' | 'batches' | 'syllabus'>('analytics');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'crm' | 'batches' | 'syllabus'>('crm');
 
     // Data States
     const [students, setStudents] = useState<Student[]>([]);
@@ -325,12 +324,47 @@ const AdminDashboard = () => {
     };
 
     // Admission letter API integration
-    const triggerAdmissionLetterDownload = (studentId: string) => {
-        window.open(`${API_URL}/students/${studentId}/admission-letter?download=true`, '_blank');
+    const triggerAdmissionLetterDownload = async (studentId: string) => {
+        const loadingToast = toast.loading('Downloading admission letter PDF...');
+        try {
+            const res = await axios.get(`${API_URL}/students/${studentId}/admission-letter?download=true`, {
+                headers: { Authorization: `Bearer ${getToken()}` },
+                responseType: 'blob'
+            });
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Admission_Letter_${studentId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            toast.dismiss(loadingToast);
+            toast.success('Download started.');
+        } catch (err) {
+            toast.dismiss(loadingToast);
+            console.error(err);
+            toast.error('Failed to download admission letter.');
+        }
     };
 
-    const triggerAdmissionLetterPreview = (studentId: string) => {
-        window.open(`${API_URL}/students/${studentId}/admission-letter?download=false`, '_blank');
+    const triggerAdmissionLetterPreview = async (studentId: string) => {
+        const loadingToast = toast.loading('Preparing preview...');
+        try {
+            const res = await axios.get(`${API_URL}/students/${studentId}/admission-letter?download=false`, {
+                headers: { Authorization: `Bearer ${getToken()}` },
+                responseType: 'blob'
+            });
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            toast.dismiss(loadingToast);
+        } catch (err) {
+            toast.dismiss(loadingToast);
+            console.error(err);
+            toast.error('Failed to load preview.');
+        }
     };
 
     const triggerAdmissionLetterEmail = async (studentId: string) => {
@@ -538,7 +572,24 @@ const AdminDashboard = () => {
 
     return (
         <div className={`min-h-screen transition-colors duration-300 ${pageBg}`}>
-            <Navbar />
+            {/* Minimal Admin Top Navbar */}
+            <header className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-all duration-300 ${isDark ? 'bg-[rgba(11,15,15,0.88)] border-[rgba(20,184,166,0.15)] text-[#E6FFFA]' : 'bg-[rgba(255,255,255,0.92)] border-[rgba(13,148,136,0.15)] text-[#0F172A]'}`}>
+                <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <img src={logo} alt="EDSEC Innovations Logo" className="h-10 w-auto object-contain" />
+                        <span className="font-bold text-lg tracking-wider bg-gradient-to-r from-[#14B8A6] to-[#0D9488] bg-clip-text text-transparent">EDSEC CRM</span>
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">Admin portal</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={toggleTheme}
+                            className={`p-2 rounded-xl transition-all border ${isDark ? 'text-[#14B8A6] border-[rgba(20,184,166,0.22)] hover:bg-[#14B8A6]/15' : 'text-[#0D9488] border-[rgba(13,148,136,0.22)] hover:bg-[#0D9488]/10'}`}
+                        >
+                            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                        </button>
+                    </div>
+                </div>
+            </header>
 
             <section className="py-8 min-h-[calc(100vh-64px)]">
                 <div className="container max-w-7xl mx-auto px-4">
@@ -1576,7 +1627,10 @@ const AdminDashboard = () => {
                 </div>
             )}
 
-            <Footer />
+            {/* Simple Footer */}
+            <footer className="py-6 border-t border-[rgba(20,184,166,0.1)] text-center text-xs text-slate-500 dark:text-slate-400">
+                <p>© {new Date().getFullYear()} EDSEC Innovations. All rights reserved. Admin Control Centre.</p>
+            </footer>
         </div>
     );
 };

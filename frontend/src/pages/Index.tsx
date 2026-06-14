@@ -686,11 +686,16 @@ const Index = () => {
                   Enroll Now <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link to="/contact">
+              <a 
+                href="https://wa.me/918660132700?text=Hi!%20I%20would%20like%20to%20talk%20to%20a%20mentor%20about%20EdSec%20Innovations%20programs."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto"
+              >
                 <Button size="lg" className={`w-full sm:w-auto h-14 px-8 font-semibold rounded-xl transition-all duration-300 hover:scale-105 ${btnOutline}`}>
                   Talk to a Mentor
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
         </div>

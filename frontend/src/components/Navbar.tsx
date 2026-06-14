@@ -14,26 +14,7 @@ const Navbar = () => {
   const { isDark, toggleTheme } = useTheme();
   const isActive = (path: string) => location.pathname === path;
 
-  // Secret admin portal access state
-  const [logoClicks, setLogoClicks] = useState(0);
-  const [lastClickTime, setLastClickTime] = useState(0);
 
-  const handleLogoClick = (e: React.MouseEvent) => {
-    const currentTime = Date.now();
-    if (currentTime - lastClickTime < 450) {
-      const newClicks = logoClicks + 1;
-      setLogoClicks(newClicks);
-      if (newClicks >= 2) { // 3 quick clicks total
-        e.preventDefault();
-        e.stopPropagation();
-        setLogoClicks(0);
-        navigate('/admin-login');
-      }
-    } else {
-      setLogoClicks(0);
-    }
-    setLastClickTime(currentTime);
-  };
 
   const navLinks = [
     { key: 'home', path: '/' },
@@ -69,7 +50,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between py-2">
 
           {/* Logo — teal glow in dark, clean in light */}
-          <Link to="/" className="flex-shrink-0" onClick={handleLogoClick}>
+          <a href="/" className="flex-shrink-0">
             <img
               src={logo}
               alt="EDSEC Innovations"
@@ -79,7 +60,7 @@ const Navbar = () => {
                   : 'brightness-90'
               }`}
             />
-          </Link>
+          </a>
 
           {/* Desktop Links */}
           <div className="hidden md:flex items-center gap-1.5">

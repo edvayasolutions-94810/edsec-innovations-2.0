@@ -2,8 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Courses from "./pages/Courses";
 import InternshipDetails from "./pages/InternshipDetails";
@@ -16,9 +15,6 @@ import Privacy from "./pages/Privacy";
 import Enroll from "./pages/Enroll";
 import NotFound from "./pages/NotFound";
 import ProgramDetails from "./pages/ProgramDetails";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminLogin from "./pages/AdminLogin";
-import ProtectedRoute from "./components/ProtectedRoute";
 import StudentLogin from "./pages/StudentLogin";
 import StudentDashboard from "./pages/StudentDashboard";
 import FloatingContact from "./components/FloatingContact";
@@ -26,27 +22,6 @@ import ScrollToTop from "./components/ScrollToTop";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
 const queryClient = new QueryClient();
-
-const GlobalShortcutListener = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Listen for Ctrl + Shift + A or Cmd + Shift + A
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
-        e.preventDefault();
-        navigate('/admin-login');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [navigate]);
-
-  return null;
-};
 
 const App = () => (
   <ThemeProvider>
@@ -57,7 +32,6 @@ const App = () => (
       <Sonner />
       <HashRouter>
         <ScrollToTop />
-        <GlobalShortcutListener />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Index />} />
@@ -71,10 +45,6 @@ const App = () => (
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/enroll" element={<Enroll />} />
-
-          {/* Admin Routes */}
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
           {/* Student Routes */}
           <Route path="/student/login" element={<StudentLogin />} />
