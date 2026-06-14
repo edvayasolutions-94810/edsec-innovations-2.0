@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowRight, CheckCircle2, Award, Zap, Briefcase, Globe, Sparkles, 
-  Code, Cpu, Shield, GraduationCap, BookOpen, Users, Lightbulb, 
+  Code, Cpu, GraduationCap, BookOpen, Users, Lightbulb, 
   ChevronRight, ChevronLeft, MessageSquare, HelpCircle, Layers, Check,
-  Database, BarChart3, Cloud, GitBranch, Megaphone, Eye, ShieldAlert,
+  Database, BarChart3, GitBranch, Megaphone, Eye, ShieldAlert,
   Server, Laptop, AwardPlayIcon, Star
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
@@ -130,13 +130,11 @@ const Index = () => {
     { name: 'Artificial Intelligence', icon: Cpu },
     { name: 'Machine Learning', icon: Cpu },
     { name: 'Data Analytics', icon: BarChart3 },
-    { name: 'Cloud Computing', icon: Cloud },
     { name: 'Web Development', icon: Globe },
     { name: 'Git & GitHub', icon: GitBranch },
     { name: 'APIs', icon: Layers },
     { name: 'Digital Marketing', icon: Megaphone },
-    { name: 'Augmented Reality', icon: Eye },
-    { name: 'Cybersecurity Fundamentals', icon: Shield }
+    { name: 'Augmented Reality', icon: Eye }
   ];
 
   const projects = {
@@ -646,7 +644,7 @@ const Index = () => {
               },
               {
                 q: "What technologies are covered?",
-                a: "We cover Python, SQL, Web Development, Cloud Computing, AI, Machine Learning, Data Analytics, APIs, Git/GitHub, Digital Marketing, AR, and Cybersecurity fundamentals."
+                a: "We cover Python, SQL, Web Development, AI, Machine Learning, Data Analytics, APIs, Git/GitHub, Digital Marketing, and AR."
               },
               {
                 q: "Can students learn remotely?",
