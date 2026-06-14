@@ -160,6 +160,23 @@ const StudentSchema = new mongoose.Schema({
             timestamp: { type: Date, default: Date.now },
             updatedBy: { type: String, default: 'Admin' }
         }
+    ],
+    follow_up_date: {
+        type: Date,
+        required: false
+    },
+    installments: [
+        {
+            amount: Number,
+            dueDate: Date,
+            status: { type: String, enum: ['Pending', 'Paid'], default: 'Pending' }
+        }
+    ],
+    attendance: [
+        {
+            date: Date,
+            present: { type: Boolean, default: true }
+        }
     ]
 }, { timestamps: true });
 

@@ -435,7 +435,7 @@ const assignStudentBatch = async (req, res) => {
 
 const sendCustomEmail = async (req, res) => {
     try {
-        const { subject, message, adminName } = req.body;
+        const { subject, message, adminName, attachOfferLetter, manualAttachment } = req.body;
         const student = await Student.findById(req.params.id);
         if (!student) {
             return res.status(404).json({ message: 'Student not found' });
@@ -455,21 +455,59 @@ const sendCustomEmail = async (req, res) => {
             }
         });
 
+        let attachments = [];
+        if (attachOfferLetter) {
+            const { drawPDFAdmissionLetter } = require('./pdfController');
+            const PDFDocument = require('pdfkit');
+            const doc = new PDFDocument({ margin: 50 });
+            const buffers = [];
+            doc.on('data', buffers.push.bind(buffers));
+            
+            await new Promise((resolve) => {
+                doc.on('end', () => {
+                    const pdfBuffer = Buffer.concat(buffers);
+                    attachments.push({
+                        filename: `${student.full_name.replace(/\s+/g, '_')}_Admission_Letter.pdf`,
+                        content: pdfBuffer,
+                        contentType: 'application/pdf'
+                    });
+                    resolve();
+                });
+                drawPDFAdmissionLetter(doc, student);
+                doc.end();
+            });
+        }
+
+        if (manualAttachment && manualAttachment.content) {
+            attachments.push({
+                filename: manualAttachment.filename || 'Offer_Letter.pdf',
+                content: Buffer.from(manualAttachment.content, 'base64'),
+                contentType: manualAttachment.contentType || 'application/pdf'
+            });
+        }
+
         const mailOptions = {
             from: `"EDSEC" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
             to: student.email,
             subject: subject,
             text: message,
-            html: `<div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">${message.replace(/\n/g, '<br>')}</div>`
+            html: `<div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">${message.replace(/\n/g, '<br>')}</div>`,
+            attachments: attachments
         };
 
         await transporter.sendMail(mailOptions);
 
         if (!student.communication_history) student.communication_history = [];
+        let attachmentLoggedText = '';
+        if (attachOfferLetter) attachmentLoggedText += '\n[Attachment: Auto-Generated Admission Letter]';
+        if (manualAttachment && manualAttachment.filename) {
+            attachmentLoggedText += `\n[Attachment: Manual - ${manualAttachment.filename}]`;
+        }
+
         student.communication_history.push({
             type: 'email',
-            subject,
-            message,
+            subject: subject,
+            message: message + attachmentLoggedText,
             status: 'Sent',
             sender: adminName || 'Admin',
             timestamp: new Date()
@@ -480,6 +518,109 @@ const sendCustomEmail = async (req, res) => {
     } catch (err) {
         console.error('Send custom email error:', err.message);
         res.status(500).send('Server Error sending email');
+    }
+};
+
+const bulkUpdateStudents = async (req, res) => {
+    try {
+        const { ids, updates, adminName } = req.body;
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ message: 'No student IDs provided' });
+        }
+
+        const author = adminName || 'Admin';
+
+        // Bulk batch update logic
+        if (updates.batch_id !== undefined) {
+            const batchId = updates.batch_id;
+            
+            for (const id of ids) {
+                const student = await Student.findById(id);
+                if (!student) continue;
+                
+                const oldBatchId = student.batch_id;
+                
+                if (batchId) {
+                    const batch = await Batch.findById(batchId);
+                    if (batch) {
+                        student.batch_id = batch._id;
+                        student.batch_selected = batch.name;
+                        
+                        if (oldBatchId && oldBatchId.toString() !== batchId) {
+                            await Batch.findByIdAndUpdate(oldBatchId, {
+                                $pull: { studentsAssigned: student._id }
+                            });
+                        }
+                        
+                        if (!batch.studentsAssigned.includes(student._id)) {
+                            batch.studentsAssigned.push(student._id);
+                            await batch.save();
+                        }
+                    }
+                } else {
+                    student.batch_id = undefined;
+                    student.batch_selected = '';
+                    
+                    if (oldBatchId) {
+                        await Batch.findByIdAndUpdate(oldBatchId, {
+                            $pull: { studentsAssigned: student._id }
+                        });
+                    }
+                }
+                await student.save();
+            }
+            
+            delete updates.batch_id;
+            delete updates.batch_selected;
+        }
+
+        // Apply remaining updates
+        if (updates && Object.keys(updates).length > 0) {
+            for (const id of ids) {
+                const student = await Student.findById(id);
+                if (!student) continue;
+                
+                Object.keys(updates).forEach(field => {
+                    student[field] = updates[field];
+                });
+                
+                if (updates.status) {
+                    if (!student.status_history) student.status_history = [];
+                    student.status_history.push({ status: updates.status, updatedBy: author });
+                }
+                
+                await student.save();
+            }
+        }
+
+        res.json({ message: `Successfully updated ${ids.length} students` });
+    } catch (err) {
+        console.error('Bulk update error:', err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
+const bulkDeleteStudents = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ message: 'No student IDs provided' });
+        }
+
+        for (const id of ids) {
+            const student = await Student.findById(id);
+            if (student && student.batch_id) {
+                await Batch.findByIdAndUpdate(student.batch_id, {
+                    $pull: { studentsAssigned: student._id }
+                });
+            }
+        }
+
+        await Student.deleteMany({ _id: { $in: ids } });
+        res.json({ message: `Successfully deleted ${ids.length} students` });
+    } catch (err) {
+        console.error('Bulk delete error:', err.message);
+        res.status(500).send('Server Error');
     }
 };
 
@@ -494,5 +635,7 @@ module.exports = {
     updateStudentStatus,
     addStudentNote,
     assignStudentBatch,
-    sendCustomEmail
+    sendCustomEmail,
+    bulkUpdateStudents,
+    bulkDeleteStudents
 };

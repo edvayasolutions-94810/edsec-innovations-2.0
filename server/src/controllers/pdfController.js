@@ -280,8 +280,194 @@ const emailAdmissionLetterPDF = async (req, res) => {
     }
 };
 
+const drawPDFCertificate = (doc, student) => {
+    // Draw background border
+    doc.rect(20, 20, 752, 572).lineWidth(4).strokeColor('#0d9488').stroke();
+    doc.rect(26, 26, 740, 560).lineWidth(1).strokeColor('#14b8a6').stroke();
+
+    // Header
+    doc.moveDown(4);
+    doc.fillColor('#0f172a')
+       .fontSize(36)
+       .font('Helvetica-Bold')
+       .text('EDSEC INNOVATIONS', { align: 'center' });
+       
+    doc.moveDown(0.5);
+    doc.fontSize(14)
+       .font('Helvetica-Oblique')
+       .fillColor('#64748b')
+       .text('Certificate of Course Completion', { align: 'center' });
+       
+    doc.moveDown(2);
+    doc.fontSize(16)
+       .font('Helvetica')
+       .fillColor('#334155')
+       .text('This is proudly presented to', { align: 'center' });
+       
+    doc.moveDown(1);
+    doc.fontSize(28)
+       .font('Helvetica-Bold')
+       .fillColor('#0d9488')
+       .text(student.full_name, { align: 'center' });
+       
+    // Divider line
+    doc.moveDown(0.5);
+    doc.moveTo(200, doc.y).lineTo(592, doc.y).strokeColor('#e2e8f0').stroke();
+    doc.moveDown(1.5);
+    
+    const courseTitle = student.course_name || 'Technical Program';
+    doc.fontSize(14)
+       .font('Helvetica')
+       .fillColor('#334155')
+       .text('for successfully completing the advanced training program in', { align: 'center' });
+       
+    doc.moveDown(0.5);
+    doc.fontSize(18)
+       .font('Helvetica-Bold')
+       .fillColor('#0f172a')
+       .text(courseTitle, { align: 'center' });
+       
+    if (student.domain) {
+        doc.fontSize(12)
+           .font('Helvetica')
+           .fillColor('#64748b')
+           .text(`Specialization Domain: ${student.domain}`, { align: 'center' });
+    }
+    
+    doc.moveDown(1);
+    const dateStr = new Date().toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    doc.fontSize(12)
+       .font('Helvetica')
+       .fillColor('#64748b')
+       .text(`Enrollment ID: ${student.enrollment_id || 'N/A'} | Date: ${dateStr}`, { align: 'center' });
+       
+    doc.moveDown(3);
+    
+    // Signatures
+    const sigY = doc.y;
+    doc.fontSize(11).font('Helvetica-Bold').fillColor('#334155').text('Program Director', 100, sigY);
+    doc.moveTo(100, sigY - 10).lineTo(230, sigY - 10).strokeColor('#cbd5e1').stroke();
+    
+    doc.font('Helvetica-Bold').text('Academic Committee', 542, sigY, { align: 'right' });
+    doc.moveTo(542, sigY - 10).lineTo(692, sigY - 10).strokeColor('#cbd5e1').stroke();
+};
+
+const generateCertificatePDF = async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.id);
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        const doc = new PDFDocument({ layout: 'landscape', size: 'letter', margin: 50 });
+        const filename = `${student.full_name.replace(/\s+/g, '_')}_Completion_Certificate.pdf`;
+
+        if (req.query.download === 'true') {
+            res.setHeader('Content-disposition', `attachment; filename="${filename}"`);
+        } else {
+            res.setHeader('Content-disposition', `inline; filename="${filename}"`);
+        }
+        res.setHeader('Content-type', 'application/pdf');
+
+        doc.pipe(res);
+        drawPDFCertificate(doc, student);
+        doc.end();
+
+    } catch (err) {
+        console.error('PDF Certificate Error:', err.message);
+        res.status(500).send('Server Error generating Certificate');
+    }
+};
+
+const emailCertificatePDF = async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.id);
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        const doc = new PDFDocument({ layout: 'landscape', size: 'letter', margin: 50 });
+        const buffers = [];
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', async () => {
+            const pdfBuffer = Buffer.concat(buffers);
+            const nodemailer = require('nodemailer');
+            
+            const host = process.env.SMTP_HOST || 'smtp.ethereal.email';
+            const port = parseInt(process.env.SMTP_PORT || '587');
+            const secure = port === 465;
+            const transporter = nodemailer.createTransport({
+                host,
+                port,
+                secure,
+                auth: {
+                    user: process.env.SMTP_USER || 'dummy_user',
+                    pass: process.env.SMTP_PASS || 'dummy_pass'
+                }
+            });
+
+            const filename = `${student.full_name.replace(/\s+/g, '_')}_Completion_Certificate.pdf`;
+            const mailOptions = {
+                from: `"EDSEC" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+                to: student.email,
+                subject: '🎉 Your Official EdSec Completion Certificate',
+                text: `Dear ${student.full_name},\n\nCongratulations on successfully completing the ${student.course_name} program! Please find attached your official Completion Certificate.\n\nRegards,\nEdSec Academic Committee`,
+                html: `<div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
+                    <h2>Dear ${student.full_name},</h2>
+                    <p>Congratulations! We are proud to present you with your official <strong>Completion Certificate</strong> for the <strong>${student.course_name}</strong> program.</p>
+                    <p>Your hard work and dedication have paid off. The certificate is attached to this email.</p>
+                    <br/>
+                    <p>Regards,<br/><strong>EdSec Academic Committee</strong></p>
+                </div>`,
+                attachments: [
+                    {
+                        filename: filename,
+                        content: pdfBuffer,
+                        contentType: 'application/pdf'
+                    }
+                ]
+            };
+
+            try {
+                await transporter.sendMail(mailOptions);
+                
+                if (!student.communication_history) student.communication_history = [];
+                student.communication_history.push({
+                    type: 'email',
+                    subject: '🎉 Your Official EdSec Completion Certificate',
+                    message: 'Official Completion Certificate PDF attached and sent via email.',
+                    status: 'Sent',
+                    sender: req.body.adminName || 'Admin',
+                    timestamp: new Date()
+                });
+                
+                await student.save();
+                res.json({ message: 'Certificate emailed successfully!' });
+            } catch (mailErr) {
+                console.error('Mail Send Error:', mailErr.message);
+                res.status(500).json({ error: 'Failed to send email: ' + mailErr.message });
+            }
+        });
+
+        drawPDFCertificate(doc, student);
+        doc.end();
+
+    } catch (err) {
+        console.error('Email Certificate Error:', err.message);
+        res.status(500).send('Server Error emailing Certificate');
+    }
+};
+
 module.exports = {
     downloadSyllabusPDF,
     generateAdmissionLetterPDF,
-    emailAdmissionLetterPDF
+    emailAdmissionLetterPDF,
+    drawPDFAdmissionLetter,
+    drawPDFCertificate,
+    generateCertificatePDF,
+    emailCertificatePDF
 };

@@ -24,6 +24,38 @@ const getApiUrl = () => {
 };
 const API_URL = getApiUrl();
 
+const PREWRITTEN_TEMPLATES = [
+    {
+        name: "Admission Offer Letter Notification",
+        subject: "🎉 Welcome to EdSec Innovations - Official Admission Offer Letter",
+        message: "Dear candidate,\n\nWe are pleased to inform you that your enrollment has been approved! Attached to this email is your official Admission Offer Letter detailing your course information and onboarding schedule.\n\nPlease review it and complete your fee payment at your earliest convenience.\n\nWarm regards,\nEdSec Admissions Committee"
+    },
+    {
+        name: "Document Verification Request",
+        subject: "Action Required: Document Verification for EdSec Enrollment",
+        message: "Dear candidate,\n\nOur team is currently reviewing your registration. To proceed with your cohort assignment, please reply to this email with copies of your:\n1. Latest college marksheet or degree certificate\n2. Aadhaar / Govt photo ID proof\n\nPlease submit these documents within 48 hours.\n\nBest regards,\nEdSec Admissions Team"
+    },
+    {
+        name: "Fee Installment Reminder",
+        subject: "Reminder: Upcoming Program Fee Installment Payment Due",
+        message: "Dear candidate,\n\nThis is a friendly reminder that your next program fee installment is due soon. Kindly make the payment of your pending balance to avoid any disruption to your classes or portal access.\n\nIf you have already paid, please ignore this email and send us the payment receipt screenshot.\n\nRegards,\nEdSec Finance Department"
+    }
+];
+
+const WHATSAPP_TEMPLATES = [
+    {
+        name: "🔔 Fee Payment Reminder",
+        text: "Hi! This is a friendly reminder from EdSec Innovations that your next installment is due. Please complete the payment to proceed with your classes. Thank you!"
+    },
+    {
+        name: "📄 Onboarding Documents",
+        text: "Hi! To complete your enrollment, please share your college ID card, graduation year proof, and marksheet. Let us know if you need any help!"
+    },
+    {
+        name: "🚀 Batch Commencement",
+        text: "Hi! Exciting news — your assigned cohort is scheduled to start classes next week. Get ready to kickstart your tech journey!"
+    }
+];
 
 interface Student {
     _id: string;
@@ -80,6 +112,18 @@ interface Student {
         status: string;
         timestamp: string;
         updatedBy: string;
+    }[];
+    follow_up_date?: string;
+    installments?: {
+        _id?: string;
+        amount: number;
+        dueDate: string;
+        status: 'Pending' | 'Paid';
+    }[];
+    attendance?: {
+        _id?: string;
+        date: string;
+        present: boolean;
     }[];
 }
 
@@ -155,6 +199,20 @@ const AdminDashboard = () => {
 
     // Batch expanded list helper
     const [expandedBatchId, setExpandedBatchId] = useState<string | null>(null);
+
+    const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
+    const [visibleColumns, setVisibleColumns] = useState<string[]>(['profile', 'program', 'financial', 'status', 'actions']);
+    const [editingCell, setEditingCell] = useState<{ id: string, field: string } | null>(null);
+    const [editingValue, setEditingValue] = useState<string>('');
+    const [attachOfferLetter, setAttachOfferLetter] = useState(false);
+    const [manualAttachment, setManualAttachment] = useState<{ filename: string; content: string; contentType: string } | null>(null);
+    const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
+    
+    // Installments editing state
+    const [tempInstallments, setTempInstallments] = useState<{ amount: number; dueDate: string; status: 'Pending' | 'Paid' }[]>([]);
+    
+    // Attendance states
+    const [attendanceDate, setAttendanceDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
     const getToken = () => localStorage.getItem('adminToken') || '';
 
@@ -308,12 +366,22 @@ const AdminDashboard = () => {
         try {
             await axios.post(
                 `${API_URL}/students/${selectedStudent._id}/send-email`,
-                { subject: customEmailSubject, message: customEmailMessage, adminName: 'Admin Partner' },
+                { 
+                    subject: customEmailSubject, 
+                    message: customEmailMessage, 
+                    adminName: 'Admin Partner', 
+                    attachOfferLetter,
+                    manualAttachment
+                },
                 { headers: { Authorization: `Bearer ${getToken()}` } }
             );
             toast.success('Custom email sent successfully and logged.');
             setCustomEmailSubject('');
             setCustomEmailMessage('');
+            setAttachOfferLetter(false);
+            setManualAttachment(null);
+            const fileInput = document.getElementById('manual-attachment-input') as HTMLInputElement;
+            if (fileInput) fileInput.value = '';
             fetchStudents();
         } catch (err: any) {
             console.error(err);
@@ -383,6 +451,216 @@ const AdminDashboard = () => {
             console.error(err);
             toast.error('Failed to email admission letter');
         }
+    };
+
+    const triggerCertificateDownload = async (studentId: string) => {
+        const loadingToast = toast.loading('Downloading completion certificate PDF...');
+        try {
+            const res = await axios.get(`${API_URL}/students/${studentId}/certificate?download=true`, {
+                headers: { Authorization: `Bearer ${getToken()}` },
+                responseType: 'blob'
+            });
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Completion_Certificate_${studentId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            toast.dismiss(loadingToast);
+            toast.success('Download started.');
+        } catch (err) {
+            toast.dismiss(loadingToast);
+            console.error(err);
+            toast.error('Failed to download completion certificate.');
+        }
+    };
+
+    const triggerCertificateEmail = async (studentId: string) => {
+        const loadingToast = toast.loading('Sending Completion Certificate via email...');
+        try {
+            await axios.post(
+                `${API_URL}/students/${studentId}/certificate/email`,
+                { adminName: 'Admin Partner' },
+                { headers: { Authorization: `Bearer ${getToken()}` } }
+            );
+            toast.dismiss(loadingToast);
+            toast.success('Completion Certificate emailed successfully!');
+        } catch (err) {
+            toast.dismiss(loadingToast);
+            console.error(err);
+            toast.error('Failed to email completion certificate.');
+        }
+    };
+
+    const handleInlineSave = async (studentId: string, field: string, value: any) => {
+        try {
+            const numVal = (field === 'program_fee' || field === 'amount_paid') ? parseFloat(value) || 0 : value;
+            await axios.put(
+                `${API_URL}/students/${studentId}`,
+                { [field]: numVal },
+                { headers: { Authorization: `Bearer ${getToken()}` } }
+            );
+            toast.success('Field updated successfully.');
+            fetchStudents();
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to update field.');
+        } finally {
+            setEditingCell(null);
+        }
+    };
+
+    const handleBulkStatusChange = async (status: string) => {
+        if (selectedStudentIds.length === 0) return;
+        const loadingToast = toast.loading(`Updating ${selectedStudentIds.length} students...`);
+        try {
+            await axios.put(
+                `${API_URL}/students/bulk-update`,
+                { ids: selectedStudentIds, updates: { status }, adminName: 'Admin Partner' },
+                { headers: { Authorization: `Bearer ${getToken()}` } }
+            );
+            toast.dismiss(loadingToast);
+            toast.success(`Successfully updated ${selectedStudentIds.length} records.`);
+            setSelectedStudentIds([]);
+            fetchStudents();
+        } catch (err) {
+            toast.dismiss(loadingToast);
+            console.error(err);
+            toast.error('Failed to update records in bulk.');
+        }
+    };
+
+    const handleBulkBatchAssign = async (batchId: string) => {
+        if (selectedStudentIds.length === 0) return;
+        const loadingToast = toast.loading('Assigning cohort to selected students...');
+        try {
+            await axios.put(
+                `${API_URL}/students/bulk-update`,
+                { ids: selectedStudentIds, updates: { batch_id: batchId || null }, adminName: 'Admin Partner' },
+                { headers: { Authorization: `Bearer ${getToken()}` } }
+            );
+            toast.dismiss(loadingToast);
+            toast.success(`Assigned batch to ${selectedStudentIds.length} students.`);
+            setSelectedStudentIds([]);
+            fetchStudents();
+            fetchBatches();
+        } catch (err) {
+            toast.dismiss(loadingToast);
+            console.error(err);
+            toast.error('Failed to assign batch.');
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedStudentIds.length === 0) return;
+        if (!window.confirm(`Are you sure you want to delete the ${selectedStudentIds.length} selected candidate records?`)) return;
+        const loadingToast = toast.loading('Deleting selected records...');
+        try {
+            await axios.delete(
+                `${API_URL}/students/bulk-delete`,
+                {
+                    data: { ids: selectedStudentIds },
+                    headers: { Authorization: `Bearer ${getToken()}` }
+                }
+            );
+            toast.dismiss(loadingToast);
+            toast.success(`Deleted ${selectedStudentIds.length} records.`);
+            setSelectedStudentIds([]);
+            fetchStudents();
+        } catch (err) {
+            toast.dismiss(loadingToast);
+            console.error(err);
+            toast.error('Failed to delete records.');
+        }
+    };
+
+    const handleSaveInstallments = async () => {
+        if (!selectedStudent) return;
+        try {
+            await axios.put(
+                `${API_URL}/students/${selectedStudent._id}`,
+                { installments: tempInstallments },
+                { headers: { Authorization: `Bearer ${getToken()}` } }
+            );
+            toast.success('Installment payment schedule saved.');
+            setSelectedStudent({ ...selectedStudent, installments: tempInstallments } as Student);
+            fetchStudents();
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to save installment schedule.');
+        }
+    };
+
+    const handleToggleAttendance = async (studentId: string, isPresent: boolean) => {
+        try {
+            const student = students.find(s => s._id === studentId);
+            if (!student) return;
+            
+            let newAttendance = (student.attendance || []).filter(a => 
+                new Date(a.date).toDateString() !== new Date(attendanceDate).toDateString()
+            );
+            newAttendance.push({ date: new Date(attendanceDate).toISOString(), present: isPresent });
+            
+            await axios.put(
+                `${API_URL}/students/${studentId}`,
+                { attendance: newAttendance },
+                { headers: { Authorization: `Bearer ${getToken()}` } }
+            );
+            fetchStudents();
+            toast.success('Attendance status logged.');
+        } catch (err) {
+            console.error(err);
+            toast.error('Failed to save attendance.');
+        }
+    };
+
+    const handleTemplateSelect = (index: number) => {
+        const template = PREWRITTEN_TEMPLATES[index];
+        if (template && selectedStudent) {
+            let msg = template.message
+                .replace(/candidate/g, selectedStudent.full_name)
+                .replace(/\[Name\]/g, selectedStudent.full_name)
+                .replace(/\[Course\]/g, selectedStudent.course_name || selectedStudent.domain || 'your enrolled program');
+            setCustomEmailSubject(template.subject);
+            setCustomEmailMessage(msg);
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) {
+            setManualAttachment(null);
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            toast.error('File is too large. Maximum size is 10MB.');
+            e.target.value = '';
+            setManualAttachment(null);
+            return;
+        }
+
+        setIsUploadingAttachment(true);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = (reader.result as string).split(',')[1];
+            setManualAttachment({
+                filename: file.name,
+                content: base64String,
+                contentType: file.type
+            });
+            setIsUploadingAttachment(false);
+            toast.success(`Attached file: ${file.name}`);
+        };
+        reader.onerror = () => {
+            toast.error('Failed to read file.');
+            setIsUploadingAttachment(false);
+            setManualAttachment(null);
+        };
+        reader.readAsDataURL(file);
     };
 
     // Create a new batch
@@ -492,6 +770,7 @@ const AdminDashboard = () => {
 
     const handleOpenProfileDrawer = (student: Student) => {
         setSelectedStudent(student);
+        setTempInstallments(student.installments || []);
         setDrawerOpen(true);
     };
 
@@ -1404,11 +1683,94 @@ const AdminDashboard = () => {
                                 </div>
 
                                 {/* Custom Email Dispatch form */}
-                                <form onSubmit={handleSendCustomEmail} className="space-y-2 mt-4 pt-3 border-t border-slate-800/40">
+                                <form onSubmit={handleSendCustomEmail} className="space-y-3 mt-4 pt-3 border-t border-slate-800/40">
                                     <h5 className="font-bold text-xs">Compose & Send Custom Email</h5>
-                                    <Input placeholder="Email Subject Title" value={customEmailSubject} onChange={e => setCustomEmailSubject(e.target.value)} required className={inputBg} />
-                                    <textarea placeholder="Write email body text..." rows={3} value={customEmailMessage} onChange={e => setCustomEmailMessage(e.target.value)} required className={`w-full p-2 text-xs rounded-lg ${inputBg}`} />
-                                    <Button type="submit" size="sm" disabled={emailSending} className="w-full bg-[#14B8A6] hover:bg-[#0D9488] text-white flex gap-1 items-center justify-center">
+                                    
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-slate-400">Email Template</label>
+                                        <select 
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                if (val === '') {
+                                                    setCustomEmailSubject('');
+                                                    setCustomEmailMessage('');
+                                                } else {
+                                                    handleTemplateSelect(parseInt(val));
+                                                }
+                                            }} 
+                                            className={`w-full p-2 text-xs rounded-lg ${inputBg}`}
+                                            defaultValue=""
+                                        >
+                                            <option value="">-- Select Prewritten Email Template --</option>
+                                            {PREWRITTEN_TEMPLATES.map((tpl, idx) => (
+                                                <option key={idx} value={idx}>{tpl.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-slate-400">Subject</label>
+                                        <Input placeholder="Email Subject Title" value={customEmailSubject} onChange={e => setCustomEmailSubject(e.target.value)} required className={inputBg} />
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-slate-400">Message Body</label>
+                                        <textarea placeholder="Write email body text..." rows={4} value={customEmailMessage} onChange={e => setCustomEmailMessage(e.target.value)} required className={`w-full p-2 text-xs rounded-lg ${inputBg}`} />
+                                    </div>
+
+                                    <div className="flex flex-col gap-2 pt-1">
+                                        <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={attachOfferLetter} 
+                                                onChange={e => {
+                                                    setAttachOfferLetter(e.target.checked);
+                                                    if (e.target.checked) {
+                                                        setManualAttachment(null);
+                                                        const fileInput = document.getElementById('manual-attachment-input') as HTMLInputElement;
+                                                        if (fileInput) fileInput.value = '';
+                                                    }
+                                                }} 
+                                                className="rounded border-slate-700 text-[#14B8A6] focus:ring-[#14B8A6] bg-slate-900" 
+                                            />
+                                            <span>Auto-generate & attach PDF Offer Letter</span>
+                                        </label>
+
+                                        <div className="space-y-1">
+                                            <label className="text-[10px] font-bold text-slate-400">Or Attach Custom Offer Letter / File Manually</label>
+                                            <div className="flex items-center gap-2">
+                                                <input 
+                                                    id="manual-attachment-input"
+                                                    type="file" 
+                                                    onChange={handleFileChange}
+                                                    disabled={attachOfferLetter || isUploadingAttachment}
+                                                    className="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700 disabled:opacity-50"
+                                                />
+                                                {manualAttachment && (
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => {
+                                                            setManualAttachment(null);
+                                                            const fileInput = document.getElementById('manual-attachment-input') as HTMLInputElement;
+                                                            if (fileInput) fileInput.value = '';
+                                                        }} 
+                                                        className="text-red-400 hover:text-red-300"
+                                                        title="Remove attachment"
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {isUploadingAttachment && <p className="text-[10px] text-teal-400 animate-pulse">Converting file...</p>}
+                                            {manualAttachment && (
+                                                <p className="text-[10px] text-emerald-400 truncate">
+                                                    Attached: {manualAttachment.filename} ({(manualAttachment.content.length * 0.75 / 1024).toFixed(1)} KB)
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <Button type="submit" size="sm" disabled={emailSending || isUploadingAttachment} className="w-full bg-[#14B8A6] hover:bg-[#0D9488] text-white flex gap-1 items-center justify-center">
                                         <Send className="h-3.5 w-3.5" /> {emailSending ? 'Sending Custom Email...' : 'Dispatch Email'}
                                     </Button>
                                 </form>
