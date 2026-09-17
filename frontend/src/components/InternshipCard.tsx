@@ -41,10 +41,10 @@ const InternshipCard = ({ course, index }: InternshipCardProps) => {
   return (
     <div
       onClick={() => navigate(programUrl)}
-      className={`text-left ${cardBg} ${cardGlow} border ${isDark ? 'border-[#14B8A6]/20' : 'border-[#0D9488]/20'} rounded-2xl p-6 flex flex-col transition-all duration-500 hover:scale-105 hover:-translate-y-2 cursor-pointer w-full group h-full`}
+      className={`text-left ${cardBg} ${cardGlow} border ${isDark ? 'border-[#14B8A6]/20' : 'border-[#0D9488]/20'} rounded-3xl p-7 flex flex-col transition-all duration-500 hover:scale-105 hover:-translate-y-2 cursor-pointer w-full group h-full`}
     >
-      <div className="flex justify-between items-start mb-4 w-full">
-        <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${badgeBg}`}>
+      <div className="flex justify-between items-start mb-5 w-full">
+        <span className={`text-xs font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-full backdrop-blur-md border ${badgeBg} ${isDark ? 'border-teal-500/25' : 'border-teal-600/20'}`}>
           {course.duration}
         </span>
         <div className="text-right">
@@ -55,14 +55,29 @@ const InternshipCard = ({ course, index }: InternshipCardProps) => {
         </div>
       </div>
       
-      <h3 className={`text-xl font-bold mb-1 ${titleClr}`}>{course.title}</h3>
-      <p className={`text-[11px] font-medium uppercase tracking-wider mb-4 ${accentClr}`}>
-        Click to view domains & program details
+      <h3 className={`text-xl font-extrabold mb-1.5 ${titleClr}`}>{course.title}</h3>
+      <p className={`text-xs font-semibold uppercase tracking-wider mb-4 ${accentClr}`}>
+        {course.domains.length} Domains Available · Click for details
       </p>
       
-      <p className={`text-sm mb-6 flex-grow ${mutedClr}`}>
+      <p className={`text-sm mb-5 leading-relaxed ${mutedClr}`}>
         {course.description}
       </p>
+
+      {/* Domain pills preview */}
+      <div className="mb-6 flex-grow">
+        <div className="flex flex-wrap gap-1.5">
+          {course.domains.map((d, i) => (
+            <span key={i} className={`text-xs px-2.5 py-1 rounded-lg border font-medium ${
+              isDark 
+                ? 'bg-white/5 border-white/10 text-teal-200' 
+                : 'bg-black/5 border-black/10 text-teal-800'
+            }`}>
+              {d}
+            </span>
+          ))}
+        </div>
+      </div>
       
       <div className="mt-auto w-full flex items-center gap-3 relative">
         <Button 

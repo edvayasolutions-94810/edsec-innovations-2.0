@@ -243,24 +243,24 @@ const Index = () => {
       <Navbar />
 
       {/* HERO */}
-      <section className="relative overflow-hidden py-24 md:py-32 min-h-[calc(100vh-72px)] flex items-center">
-        {/* Developer Grid Background */}
+      <section className="relative overflow-hidden py-20 md:py-28 min-h-[calc(100vh-72px)] flex items-center">
+        {/* Developer Grid & Glow Background */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#14b8a60a_1px,transparent_1px),linear-gradient(to_bottom,#14b8a60a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
         <div className={`absolute inset-0 pointer-events-none ${isDark ? 'bg-[radial-gradient(circle_at_30%_30%,rgba(20,184,166,0.18),transparent_60%)]' : 'bg-[radial-gradient(circle_at_30%_30%,rgba(13,148,136,0.06),transparent_60%)]'}`} />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             
             {/* Left Content Column */}
             <div className="lg:col-span-7 text-left animate-fade-in-up">
-              <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border ${isDark ? 'bg-[#14B8A6]/10 text-[#2DD4BF] border-[#14B8A6]/20' : 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/20'}`}>
-                <Sparkles className="h-3.5 w-3.5" />
+              <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border shadow-sm ${isDark ? 'bg-[#14B8A6]/10 text-[#2DD4BF] border-[#14B8A6]/25' : 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/25'}`}>
+                <Sparkles className="h-3.5 w-3.5 animate-pulse" />
                 MSME Certified Training Institute
               </div>
-              <h1 className={`text-4xl sm:text-5xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight ${titleClr}`}>
-                Next-Gen <span className={accentClr}>Tech Education</span> & Internship Portal
+              <h1 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tight leading-[1.15] ${titleClr}`}>
+                Next-Gen <span className={`${accentClr} relative inline-block`}>Tech Education</span> & Internship Portal
               </h1>
-              <p className={`text-xl md:text-2xl mb-4 font-semibold ${subClr}`}>
+              <p className={`text-xl md:text-2xl mb-4 font-bold tracking-tight ${subClr}`}>
                 Build Skills. Gain Experience. Get Industry Ready.
               </p>
               <p className={`text-base md:text-lg mb-10 max-w-2xl leading-relaxed ${mutedClr}`}>
@@ -268,29 +268,29 @@ const Index = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-14">
                 <Link to="/enroll">
-                  <Button size="lg" className={`w-full sm:w-auto h-14 px-10 text-base font-bold tracking-wide rounded-xl border-0 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 glow-button ${btnPrimary}`}>
-                    Enroll Now
+                  <Button size="lg" className={`w-full sm:w-auto h-14 px-9 text-base font-bold tracking-wide rounded-full border-0 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 glow-button ${btnPrimary}`}>
+                    Enroll Now <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link to="/internship">
-                  <Button size="lg" className={`w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-xl transition-all duration-300 hover:scale-105 ${btnOutline}`}>
-                    Explore Programs <ArrowRight className="ml-2 h-5 w-5 animate-pulse" />
+                  <Button size="lg" className={`w-full sm:w-auto h-14 px-8 text-base font-bold rounded-full transition-all duration-300 hover:scale-105 ${btnOutline}`}>
+                    Explore Programs
                   </Button>
                 </Link>
               </div>
 
-              {/* Counters Section */}
-              <div className={`flex flex-wrap items-center gap-8 md:gap-12 pt-10 border-t ${isDark ? 'border-[rgba(20,184,166,0.13)]' : 'border-gray-200'}`}>
+              {/* Counters Section in modern card strip */}
+              <div className={`grid grid-cols-3 gap-4 pt-8 border-t ${isDark ? 'border-[rgba(20,184,166,0.15)]' : 'border-slate-200'}`}>
                 {[
                   { value: 500, label: 'Students Trained', suffix: '+' },
-                  { value: 3, label: 'Programs', suffix: '' },
+                  { value: 3, label: 'Flagship Programs', suffix: '' },
                   { value: 100, label: 'MSME Certified', suffix: '%' }
                 ].map((stat, idx) => (
-                  <div key={idx} className="flex flex-col">
-                    <p className={`text-3xl md:text-4xl font-extrabold ${accentClr}`}>
+                  <div key={idx} className={`p-4 rounded-2xl border transition-all duration-300 ${cardBg}`}>
+                    <p className={`text-2xl sm:text-3xl md:text-4xl font-black ${accentClr}`}>
                       <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                     </p>
-                    <p className={`text-xs font-semibold uppercase tracking-wider mt-1 ${mutedClr}`}>{stat.label}</p>
+                    <p className={`text-[11px] sm:text-xs font-bold uppercase tracking-wider mt-1.5 ${mutedClr}`}>{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -301,23 +301,23 @@ const Index = () => {
               <div className="animate-float relative w-full max-w-[480px]">
                 <div className={`absolute inset-0 blur-[60px] rounded-full opacity-65 ${isDark ? 'bg-[rgba(20,184,166,0.28)]' : 'bg-[rgba(13,148,136,0.14)]'}`} />
                 
-                {/* Student coding image inside a premium glassmorphic border frame */}
-                <div className={`relative rounded-3xl overflow-hidden border p-2 shadow-2xl ${isDark ? 'bg-[#0D1515]/90 border-[#14B8A6]/25' : 'bg-slate-50/90 border-slate-200'} backdrop-blur-md`}>
+                {/* Student coding image inside a premium rounded container */}
+                <div className={`relative rounded-3xl overflow-hidden border p-2.5 shadow-2xl ${isDark ? 'bg-[#0D1515]/90 border-[#14B8A6]/30' : 'bg-white border-slate-200'} backdrop-blur-md`}>
                   <img 
                     src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80" 
                     alt="Students Collaborating & Coding" 
-                    className="rounded-2xl w-full h-[320px] object-cover transition-transform duration-500 hover:scale-105"
+                    className="rounded-2xl w-full h-[340px] object-cover transition-transform duration-500 hover:scale-105"
                   />
                   
                   {/* Floating logo card */}
-                  <div className={`absolute bottom-5 right-5 p-3.5 rounded-2xl border flex items-center justify-center backdrop-blur-md shadow-lg ${isDark ? 'bg-[#0B0F0F]/90 border-[#14B8A6]/30' : 'bg-white/95 border-slate-200'}`}>
-                    <img src={logo} alt="EdSec Logo" className="h-9 w-auto object-contain" />
+                  <div className={`absolute bottom-6 right-6 px-4 py-2.5 rounded-2xl border flex items-center justify-center backdrop-blur-md shadow-xl ${isDark ? 'bg-[#0B0F0F]/90 border-[#14B8A6]/35' : 'bg-white/95 border-slate-200'}`}>
+                    <img src={logo} alt="EdSec Logo" className="h-8 w-auto object-contain" />
                   </div>
                 </div>
 
                 {/* Overlapping small code snippet widget */}
-                <div className={`absolute -bottom-6 -left-6 p-4 rounded-2xl border flex items-center gap-3 backdrop-blur-md shadow-lg transition-transform hover:scale-105 duration-300 ${isDark ? 'bg-[#121818]/90 border-[#14B8A6]/30 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
-                  <div className={`p-2 rounded-xl ${isDark ? 'bg-[#14B8A6]/20' : 'bg-[#0D9488]/10'}`}>
+                <div className={`absolute -bottom-6 -left-6 p-4 rounded-2xl border flex items-center gap-3 backdrop-blur-md shadow-xl transition-transform hover:scale-105 duration-300 ${isDark ? 'bg-[#121818]/95 border-[#14B8A6]/35 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
+                  <div className={`p-2.5 rounded-xl ${isDark ? 'bg-[#14B8A6]/20' : 'bg-[#0D9488]/10'}`}>
                     <Code className={`h-5 w-5 ${accentClr}`} />
                   </div>
                   <div>
@@ -325,6 +325,18 @@ const Index = () => {
                     <p className="text-xs font-extrabold">Project-Based Learning</p>
                   </div>
                 </div>
+
+                {/* Overlapping rating badge */}
+                <div className={`absolute -top-5 -right-5 px-4 py-2.5 rounded-2xl border flex items-center gap-2 backdrop-blur-md shadow-xl transition-transform hover:scale-105 duration-300 ${isDark ? 'bg-[#121818]/95 border-[#14B8A6]/35 text-white' : 'bg-white border-slate-200 text-slate-800'}`}>
+                  <div className="flex text-amber-400">
+                    <Star className="h-4 w-4 fill-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-extrabold">4.9 / 5.0</p>
+                    <p className="text-[10px] opacity-60 font-semibold">Student Rating</p>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -365,12 +377,12 @@ const Index = () => {
             {whyChooseUs.map((item, idx) => (
               <div 
                 key={idx} 
-                className={`p-8 rounded-2xl border transition-all duration-300 flex flex-col h-full ${cardBg} ${cardGlow}`}
+                className={`p-8 rounded-3xl border transition-all duration-300 flex flex-col h-full ${cardBg} ${cardGlow}`}
               >
-                <div className={`p-3.5 rounded-2xl self-start mb-6 ${isDark ? 'bg-[#14B8A6]/10 text-[#2DD4BF]' : 'bg-[#0D9488]/10 text-[#0D9488]'}`}>
+                <div className={`p-4 rounded-2xl self-start mb-6 ${isDark ? 'bg-[#14B8A6]/12 text-[#2DD4BF]' : 'bg-[#0D9488]/10 text-[#0D9488]'}`}>
                   <item.icon className="h-6 w-6" />
                 </div>
-                <h3 className={`text-xl font-bold mb-3 ${titleClr}`}>{item.title}</h3>
+                <h3 className={`text-xl font-extrabold mb-3 ${titleClr}`}>{item.title}</h3>
                 <p className={`text-sm leading-relaxed ${mutedClr}`}>{item.desc}</p>
               </div>
             ))}
@@ -389,7 +401,7 @@ const Index = () => {
               Technologies You Will Master
             </h2>
             <p className={`text-base mt-3 max-w-2xl mx-auto ${mutedClr}`}>
-              Get hand-on command over the most demanding skills, frameworks, and tools in modern tech domains.
+              Get hands-on command over the most in-demand skills, frameworks, and tools in modern tech domains.
             </p>
           </div>
 
@@ -397,10 +409,10 @@ const Index = () => {
             {technologies.map((tech, idx) => (
               <div 
                 key={idx} 
-                className={`p-6 rounded-2xl border text-center flex flex-col items-center justify-center transition-all duration-500 hover:-translate-y-1.5 hover:shadow-lg ${cardBg} ${isDark ? 'hover:border-[#14B8A6]/40' : 'hover:border-[#0D9488]/40'}`}
+                className={`p-6 rounded-3xl border text-center flex flex-col items-center justify-center transition-all duration-500 hover:-translate-y-1.5 hover:shadow-lg ${cardBg} ${isDark ? 'hover:border-[#14B8A6]/40' : 'hover:border-[#0D9488]/40'}`}
               >
-                <div className={`p-3 rounded-xl mb-4 ${isDark ? 'bg-[#14B8A6]/10 text-[#2DD4BF]' : 'bg-[#0D9488]/10 text-[#0D9488]'}`}>
-                  <tech.icon className="h-5 w-5" />
+                <div className={`p-3.5 rounded-2xl mb-4 ${isDark ? 'bg-[#14B8A6]/10 text-[#2DD4BF]' : 'bg-[#0D9488]/10 text-[#0D9488]'}`}>
+                  <tech.icon className="h-6 w-6" />
                 </div>
                 <span className={`font-bold text-sm tracking-wide ${titleClr}`}>{tech.name}</span>
               </div>
@@ -420,30 +432,32 @@ const Index = () => {
               Real Industry Projects
             </h2>
             <p className={`text-base mt-3 max-w-2xl mx-auto ${mutedClr}`}>
-              You won't just learn theory. You will build and deploy real applications to build a strong professional portfolio.
+              You won't just learn theory. You will build and deploy real applications to create a verified, industry-grade portfolio.
             </p>
           </div>
 
-          {/* Project Tabs */}
-          <div className="flex flex-wrap gap-3 justify-center mb-12">
-            {[
-              { id: 'python', label: 'Python Projects' },
-              { id: 'web', label: 'Web Dev Projects' },
-              { id: 'marketing', label: 'Digital Marketing' },
-              { id: 'ar', label: 'AR Projects' }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveProjTab(tab.id as any)}
-                className={`px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-                  activeProjTab === tab.id
-                    ? (isDark ? 'bg-[#14B8A6] text-white shadow-lg' : 'bg-[#0D9488] text-white shadow-md')
-                    : (isDark ? 'bg-[#121818] text-slate-300 border border-slate-800 hover:border-[#14B8A6]' : 'bg-slate-50 text-slate-700 border border-slate-200 hover:border-[#0D9488]')
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Project Tabs - Segmented Pill Control */}
+          <div className="flex justify-center mb-12">
+            <div className={`inline-flex flex-wrap gap-1.5 p-1.5 rounded-full border ${isDark ? 'bg-[#121818] border-[rgba(20,184,166,0.18)]' : 'bg-slate-100 border-slate-200'}`}>
+              {[
+                { id: 'python', label: 'Python Projects' },
+                { id: 'web', label: 'Web Dev Projects' },
+                { id: 'marketing', label: 'Digital Marketing' },
+                { id: 'ar', label: 'AR Projects' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveProjTab(tab.id as any)}
+                  className={`px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm transition-all duration-300 ${
+                    activeProjTab === tab.id
+                      ? (isDark ? 'bg-[#14B8A6] text-white shadow-[0_0_14px_rgba(20,184,166,0.4)]' : 'bg-[#0D9488] text-white shadow-[0_0_10px_rgba(13,148,136,0.3)]')
+                      : (isDark ? 'text-slate-300 hover:text-white hover:bg-white/5' : 'text-slate-600 hover:text-slate-900 hover:bg-white/60')
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Project Cards Display */}
@@ -451,27 +465,27 @@ const Index = () => {
             {projects[activeProjTab].map((proj, idx) => (
               <div 
                 key={idx} 
-                className={`rounded-2xl border overflow-hidden flex flex-col justify-between transition-all duration-500 hover:-translate-y-1.5 ${cardBg} ${cardGlow}`}
+                className={`rounded-3xl border overflow-hidden flex flex-col justify-between transition-all duration-500 hover:-translate-y-1.5 ${cardBg} ${cardGlow}`}
               >
                 {/* Project Cover Image */}
-                <div className="h-48 w-full overflow-hidden relative">
+                <div className="h-52 w-full overflow-hidden relative p-3 pb-0">
                   <img 
                     src={(proj as any).image} 
                     alt={proj.title} 
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    className="w-full h-full object-cover rounded-2xl transition-transform duration-500 hover:scale-105"
                   />
                 </div>
 
-                <div className="p-6 flex flex-col flex-grow justify-between">
+                <div className="p-7 flex flex-col flex-grow justify-between">
                   <div>
-                    <h3 className={`text-xl font-extrabold mb-2 ${titleClr}`}>{proj.title}</h3>
+                    <h3 className={`text-xl font-extrabold mb-2.5 ${titleClr}`}>{proj.title}</h3>
                     <p className={`text-sm leading-relaxed mb-6 ${mutedClr}`}>{proj.desc}</p>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-auto">
+                  <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-slate-200/10">
                     {proj.tags.map((tag, tIdx) => (
                       <span 
                         key={tIdx} 
-                        className={`text-xs font-semibold px-3 py-1 rounded-md border ${isDark ? 'bg-white/5 border-white/10 text-teal-300' : 'bg-black/5 border-black/10 text-teal-700'}`}
+                        className={`text-xs font-semibold px-3 py-1 rounded-full border ${isDark ? 'bg-white/5 border-white/10 text-teal-300' : 'bg-black/5 border-black/10 text-teal-700'}`}
                       >
                         {tag}
                       </span>
@@ -584,8 +598,8 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Carousel Buttons */}
-            <div className="flex justify-center gap-4 mt-8">
+            {/* Carousel Navigation & Dots */}
+            <div className="flex items-center justify-center gap-6 mt-8">
               <button 
                 onClick={() => setCurrentTestimonial(prev => (prev - 1 + testimonials.length) % testimonials.length)}
                 className={`p-3 rounded-full border transition-all duration-300 hover:scale-110 ${
@@ -595,6 +609,22 @@ const Index = () => {
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
+
+              <div className="flex items-center gap-2">
+                {testimonials.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentTestimonial(idx)}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      currentTestimonial === idx
+                        ? `w-8 ${isDark ? 'bg-[#14B8A6]' : 'bg-[#0D9488]'}`
+                        : `w-2.5 ${isDark ? 'bg-slate-700' : 'bg-slate-300'}`
+                    }`}
+                    aria-label={`Go to testimonial ${idx + 1}`}
+                  />
+                ))}
+              </div>
+
               <button 
                 onClick={() => setCurrentTestimonial(prev => (prev + 1) % testimonials.length)}
                 className={`p-3 rounded-full border transition-all duration-300 hover:scale-110 ${
@@ -654,12 +684,12 @@ const Index = () => {
               <AccordionItem 
                 key={idx} 
                 value={`faq-${idx}`} 
-                className={`border rounded-2xl px-6 py-2 transition-all duration-300 ${cardBg}`}
+                className={`border rounded-2xl px-6 py-1.5 transition-all duration-300 ${cardBg}`}
               >
-                <AccordionTrigger className={`text-left font-bold text-base hover:no-underline text-teal-500 hover:text-teal-400`}>
+                <AccordionTrigger className={`text-left font-bold text-base hover:no-underline py-4 ${titleClr} hover:${accentClr} transition-colors`}>
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className={`text-sm leading-relaxed mt-2 ${mutedClr}`}>
+                <AccordionContent className={`text-sm leading-relaxed pb-4 ${mutedClr}`}>
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>
@@ -682,7 +712,7 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/enroll">
-                <Button size="lg" className={`w-full sm:w-auto h-14 px-10 font-bold tracking-wide rounded-xl border-0 transition-all duration-300 hover:scale-105 hover:-translate-y-1 glow-button ${btnPrimary}`}>
+                <Button size="lg" className={`w-full sm:w-auto h-14 px-10 font-bold tracking-wide rounded-full border-0 transition-all duration-300 hover:scale-105 hover:-translate-y-1 glow-button ${btnPrimary}`}>
                   Enroll Now <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -692,7 +722,7 @@ const Index = () => {
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto"
               >
-                <Button size="lg" className={`w-full sm:w-auto h-14 px-8 font-semibold rounded-xl transition-all duration-300 hover:scale-105 ${btnOutline}`}>
+                <Button size="lg" className={`w-full sm:w-auto h-14 px-8 font-bold rounded-full transition-all duration-300 hover:scale-105 ${btnOutline}`}>
                   Talk to a Mentor
                 </Button>
               </a>

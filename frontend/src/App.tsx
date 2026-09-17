@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Courses from "./pages/Courses";
 import InternshipDetails from "./pages/InternshipDetails";
@@ -30,7 +30,7 @@ const App = () => (
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(20,184,166,0.15),transparent_70%)] z-[-1]" />
       <Toaster />
       <Sonner />
-      <HashRouter>
+      <BrowserRouter>
         <ScrollToTop />
         <Routes>
           {/* Public Routes */}
@@ -53,7 +53,7 @@ const App = () => (
           {/* Catch-all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
       <FloatingContact />
     </TooltipProvider>
   </QueryClientProvider>

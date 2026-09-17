@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -18,7 +18,7 @@ const App = () => (
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(20,184,166,0.15),transparent_70%)] z-[-1]" />
       <Toaster />
       <Sonner />
-      <HashRouter>
+      <BrowserRouter>
         <ScrollToTop />
         <Routes>
           {/* Admin Login at Root */}
@@ -32,7 +32,7 @@ const App = () => (
           {/* Catch-all redirects back to login */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
   </ThemeProvider>

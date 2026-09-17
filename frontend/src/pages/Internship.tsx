@@ -39,26 +39,31 @@ const Internship = () => {
       <Navbar />
 
       {/* Hero */}
-      <section className={`${sec2Bg} py-20 relative overflow-hidden`}>
-        <div className={`absolute inset-0 pointer-events-none ${isDark ? 'bg-[radial-gradient(ellipse_at_center,rgba(20,184,166,0.14),transparent_65%)]' : 'bg-[radial-gradient(ellipse_at_center,rgba(13,148,136,0.07),transparent_65%)]'}`} />
+      <section className={`${sec2Bg} py-24 relative overflow-hidden border-b ${isDark ? 'border-[#14B8A6]/10' : 'border-slate-100'}`}>
+        <div className={`absolute inset-0 pointer-events-none ${isDark ? 'bg-[radial-gradient(ellipse_at_center,rgba(20,184,166,0.16),transparent_65%)]' : 'bg-[radial-gradient(ellipse_at_center,rgba(13,148,136,0.08),transparent_65%)]'}`} />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 ${accentBg}`}>
-            <GraduationCap className={`h-8 w-8 ${accentClr}`} />
+          <div className="mb-4">
+            <span className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border ${
+              isDark ? 'bg-[#14B8A6]/10 text-[#2DD4BF] border-[#14B8A6]/20' : 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/20'
+            }`}>
+              <GraduationCap className="h-3.5 w-3.5" />
+              Verified Industry Slabs
+            </span>
           </div>
-          <h1 className={`text-4xl md:text-6xl font-extrabold mb-5 ${titleClr}`}>
-            Internship Programs
+          <h1 className={`text-4xl md:text-6xl font-extrabold mb-5 tracking-tight ${titleClr}`}>
+            Professional Internship Programs
           </h1>
-          <p className={`text-lg md:text-xl max-w-2xl mx-auto mb-10 ${mutedClr}`}>
-            MSME-certified internships with hands-on industry projects, expert mentorship, and real career outcomes.
+          <p className={`text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed ${mutedClr}`}>
+            MSME-certified internships featuring hands-on corporate projects, one-on-one mentor guidance, and verified career outcomes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/enroll">
-              <Button size="lg" className={`h-13 px-8 font-bold border-0 rounded-xl transition-all duration-300 hover:scale-105 glow-button ${btnPrimary}`}>
+              <Button size="lg" className={`h-14 px-10 font-bold border-0 rounded-full transition-all duration-300 hover:scale-105 glow-button ${btnPrimary}`}>
                 Enroll Now
               </Button>
             </Link>
             <Link to="/courses">
-              <Button size="lg" className={`h-13 px-8 font-semibold rounded-xl transition-all duration-300 hover:scale-105 ${btnOutline}`}>
+              <Button size="lg" className={`h-14 px-8 font-bold rounded-full transition-all duration-300 hover:scale-105 ${btnOutline}`}>
                 View All Programs
               </Button>
             </Link>
@@ -70,17 +75,17 @@ const Internship = () => {
       <section className={`${pageBg} py-20`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-14">
-            <h2 className={`text-3xl md:text-4xl font-extrabold mb-4 ${titleClr}`}>Certified IT Internship Slabs</h2>
-            <p className={`text-lg ${mutedClr}`}>Transform your career through structured, MSME-certified technical and analytical programs.</p>
+            <h2 className={`text-3xl md:text-4xl font-extrabold mb-4 tracking-tight ${titleClr}`}>Certified IT Internship Slabs</h2>
+            <p className={`text-lg max-w-2xl mx-auto ${mutedClr}`}>Accelerate your career through structured, MSME-certified technical and analytical programs.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {internships.map((course, index) => (
               <InternshipCard key={course.id} course={course} index={index} />
             ))}
           </div>
-          <div className="text-center mt-12">
+          <div className="text-center mt-14">
             <Link to="/contact">
-              <Button size="lg" variant="outline" className={`h-12 px-8 font-semibold rounded-xl transition-all duration-300 hover:scale-105 ${btnOutline}`}>
+              <Button size="lg" variant="outline" className={`h-13 px-8 font-bold rounded-full transition-all duration-300 hover:scale-105 ${btnOutline}`}>
                 Have Questions? Contact Us
               </Button>
             </Link>
@@ -89,20 +94,25 @@ const Internship = () => {
       </section>
 
       {/* Benefits */}
-      <section className={`${sec3Bg} py-20`}>
+      <section className={`${sec3Bg} py-24 border-t ${isDark ? 'border-[#14B8A6]/10' : 'border-slate-100'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <h2 className={`text-3xl md:text-4xl font-extrabold text-center mb-12 ${titleClr}`}>
-            What Makes Our Internships Special?
-          </h2>
+          <div className="text-center mb-14">
+            <span className={`text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full mb-3 inline-block ${isDark ? 'bg-[#14B8A6]/15 text-[#2DD4BF]' : 'bg-[#0D9488]/10 text-[#0D9488]'}`}>
+              Key Advantages
+            </span>
+            <h2 className={`text-3xl md:text-4xl font-extrabold tracking-tight ${titleClr}`}>
+              What Makes Our Internships Special?
+            </h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {benefits.map((b, i) => (
-              <div key={i} className={`${cardBg} border rounded-2xl p-6 flex gap-4 transition-all duration-500 hover:scale-105 hover:-translate-y-1 ${isDark ? 'hover:shadow-[0_0_20px_rgba(20,184,166,0.4)] hover:border-[rgba(20,184,166,0.4)]' : 'hover:shadow-[0_0_15px_rgba(13,148,136,0.3)] hover:border-[rgba(13,148,136,0.4)]'}`}>
-                <div className={`p-2.5 rounded-xl flex-shrink-0 ${accentBg}`}>
-                  <b.icon className={`h-5 w-5 ${accentClr}`} />
+              <div key={i} className={`${cardBg} border rounded-3xl p-7 flex gap-5 transition-all duration-500 hover:scale-105 hover:-translate-y-1 ${isDark ? 'hover:shadow-[0_0_20px_rgba(20,184,166,0.4)] hover:border-[rgba(20,184,166,0.4)]' : 'hover:shadow-[0_0_15px_rgba(13,148,136,0.3)] hover:border-[rgba(13,148,136,0.4)]'}`}>
+                <div className={`p-3.5 rounded-2xl flex-shrink-0 self-start ${accentBg}`}>
+                  <b.icon className={`h-6 w-6 ${accentClr}`} />
                 </div>
                 <div>
-                  <h3 className={`font-bold text-base mb-1.5 ${titleClr}`}>{b.title}</h3>
-                  <p className={`text-sm ${mutedClr}`}>{b.desc}</p>
+                  <h3 className={`font-extrabold text-lg mb-1.5 ${titleClr}`}>{b.title}</h3>
+                  <p className={`text-sm leading-relaxed ${mutedClr}`}>{b.desc}</p>
                 </div>
               </div>
             ))}

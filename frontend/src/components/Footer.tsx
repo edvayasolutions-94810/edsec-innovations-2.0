@@ -37,14 +37,25 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <img src={logo} alt="EDSEC Innovations"
-              className={`h-14 w-auto object-contain transition-all duration-300 hover:scale-105 mb-5 ${logoCls}`} />
-            <p className="text-xs leading-relaxed mb-6 opacity-80 max-w-[240px]">
+              className={`h-14 w-auto object-contain transition-all duration-300 hover:scale-105 mb-4 ${logoCls}`} />
+            <div className="mb-4">
+              <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                isDark ? 'bg-[#14B8A6]/15 text-[#2DD4BF] border border-[#14B8A6]/25' : 'bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20'
+              }`}>
+                Govt. MSME Certified
+              </span>
+            </div>
+            <p className="text-xs leading-relaxed mb-6 opacity-80 max-w-[260px]">
               MSME certified training institute empowering the next generation of tech professionals through hands-on internships, real-world projects, and expert mentorship.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2.5">
               {socials.map(({ href, label, icon }) => (
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-                  className={`${link} hover:scale-125 inline-block opacity-60 hover:opacity-100`} aria-label={label}>
+                  className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all duration-300 hover:scale-110 ${
+                    isDark 
+                      ? 'border-[rgba(20,184,166,0.2)] bg-white/5 text-slate-300 hover:text-white hover:border-[#14B8A6] hover:bg-[#14B8A6]/20' 
+                      : 'border-slate-200 bg-white text-slate-600 hover:text-[#0D9488] hover:border-[#0D9488] hover:bg-[#0D9488]/10'
+                  }`} aria-label={label}>
                   {icon}
                 </a>
               ))}
@@ -59,7 +70,7 @@ const Footer = () => {
                 { to: '/programs/foundation-tech-program', label: 'Foundation Tech' },
                 { to: '/programs/advanced-technology-program', label: 'Advanced Tech' },
                 { to: '/programs/professional-internship-program', label: 'Professional Internship' },
-                { to: '/courses', label: 'All Slabs' }
+                { to: '/internship', label: 'All Programs' }
               ].map(({ to, label }) => (
                 <li key={to}><Link to={to} className={`opacity-70 ${link}`}>{label}</Link></li>
               ))}

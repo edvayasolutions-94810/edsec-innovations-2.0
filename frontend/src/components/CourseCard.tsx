@@ -39,55 +39,59 @@ const CourseCard = ({ course }: CourseCardProps) => {
   };
 
   return (
-    <div className={`${cardBg} ${cardGlow} border rounded-2xl p-6 flex flex-col h-full transition-all duration-500 ease-in-out hover:scale-105 hover:-translate-y-2`}>
+    <div className={`${cardBg} ${cardGlow} border rounded-3xl p-6 flex flex-col h-full transition-all duration-500 ease-in-out hover:scale-105 hover:-translate-y-2`}>
       {/* Image */}
-      <div className="relative h-44 overflow-hidden rounded-xl mb-5 group">
+      <div className="relative h-48 overflow-hidden rounded-2xl mb-5 group">
         <img src={course.image} alt={course.title} loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
         <div className="absolute top-3 left-3">
-          <span className={`text-xs font-bold px-3 py-1 rounded-full ${badgeBg}`}>{course.duration}</span>
+          <span className={`text-xs font-bold px-3.5 py-1 rounded-full backdrop-blur-md border ${badgeBg} ${isDark ? 'border-teal-500/30' : 'border-teal-600/20'}`}>{course.duration}</span>
         </div>
       </div>
 
       {/* Title + Price */}
       <div className="flex items-start justify-between mb-2">
-        <h3 className={`text-lg font-bold leading-tight flex-1 pr-2 ${titleClr}`}>{course.title}</h3>
+        <h3 className={`text-lg font-extrabold leading-tight flex-1 pr-2 ${titleClr}`}>{course.title}</h3>
         <span className={`text-xl font-extrabold flex-shrink-0 ${priceClr}`}>₹{course.price}</span>
       </div>
 
       {/* Meta */}
-      <div className={`flex items-center gap-2 text-xs mb-3 ${mutedClr}`}>
+      <div className={`flex items-center gap-2 text-xs mb-3 font-medium ${mutedClr}`}>
         <Award className="h-3.5 w-3.5" /> <span>{course.type}</span>
         <span className="opacity-40">·</span>
         <Clock className="h-3.5 w-3.5" /> <span>{course.duration}</span>
       </div>
 
-      <p className={`text-sm mb-4 line-clamp-2 ${mutedClr}`}>{course.description}</p>
+      <p className={`text-sm mb-4 line-clamp-2 leading-relaxed ${mutedClr}`}>{course.description}</p>
       <div className={`border-t ${divider} mb-4`} />
 
       {/* Domains */}
       <div className="mb-4 flex-grow">
-        <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${accentClr}`}>Domains Available</p>
-        <ul className="space-y-1.5">
+        <p className={`text-xs font-bold uppercase tracking-wider mb-2.5 ${accentClr}`}>Domains Available</p>
+        <div className="flex flex-wrap gap-1.5">
           {course.domains.map((d, i) => (
-            <li key={i} className={`flex items-center text-sm ${mutedClr}`}>
-              <span className={`h-1.5 w-1.5 rounded-full mr-2 flex-shrink-0 ${dotClr}`} />
+            <span key={i} className={`inline-flex items-center text-xs px-2.5 py-1 rounded-lg border font-medium ${
+              isDark 
+                ? 'bg-white/5 border-white/10 text-teal-200' 
+                : 'bg-black/5 border-black/10 text-teal-800'
+            }`}>
+              <span className={`h-1.5 w-1.5 rounded-full mr-1.5 flex-shrink-0 ${dotClr}`} />
               {d}
-            </li>
+            </span>
           ))}
-        </ul>
+        </div>
       </div>
 
       <div className={`border-t ${divider} mb-4`} />
 
       {/* Features */}
       <div className="mb-5">
-        <p className={`text-xs font-semibold uppercase tracking-wider mb-2 ${accentClr}`}>Includes</p>
+        <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${accentClr}`}>Includes</p>
         <ul className="space-y-1.5">
           {course.features.slice(0, 3).map((f, i) => (
-            <li key={i} className={`flex items-start text-sm ${mutedClr}`}>
-              <CheckCircle2 className={`h-4 w-4 mr-2 mt-0.5 flex-shrink-0 ${accentClr}`} />
+            <li key={i} className={`flex items-start text-xs font-medium ${mutedClr}`}>
+              <CheckCircle2 className={`h-3.5 w-3.5 mr-2 mt-0.5 flex-shrink-0 ${accentClr}`} />
               {f}
             </li>
           ))}
@@ -97,8 +101,8 @@ const CourseCard = ({ course }: CourseCardProps) => {
       {/* Buttons */}
       <div className="flex gap-2 mt-auto">
         <Link to={`/course/${course.id}`} state={{ predefinedCourse: course.title }} className="flex-1">
-          <Button className={`w-full font-semibold tracking-wide rounded-xl transition-all duration-300 hover:scale-105 glow-button ${btnClass}`}>
-            View Details <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+          <Button className={`w-full font-bold tracking-wide rounded-xl transition-all duration-300 hover:scale-105 glow-button ${btnClass}`}>
+            View Details <ArrowRight className="ml-1.5 h-4 w-4" />
           </Button>
         </Link>
         {course.downloadBrochure && (

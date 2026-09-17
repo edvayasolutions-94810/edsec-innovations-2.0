@@ -156,7 +156,7 @@
   .card-sudur {
     background: rgba(18,24,24,0.85);
     border: 1px solid rgba(20,184,166,0.18);
-    border-radius: 16px;
+    border-radius: 20px;
     padding: 24px;
     transition: all 0.3s ease;
   }
@@ -164,6 +164,34 @@
     background: #F0FDFA;
     border: 1px solid rgba(13,148,136,0.18);
     box-shadow: 0 2px 12px rgba(13,148,136,0.06);
+  }
+
+  /* ── BRIGHTCHAMPS-INSPIRED MODERN ROUNDED CARD & PILL UTILITIES ── */
+  .card-modern {
+    border-radius: 1.5rem;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-modern:hover {
+    transform: translateY(-4px);
+  }
+
+  .pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.95rem;
+    transition: all 0.25s ease;
+  }
+
+  .tab-pill {
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .section-padding { padding-top: 80px; padding-bottom: 80px; }

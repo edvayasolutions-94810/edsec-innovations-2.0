@@ -2,6 +2,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { Target, Users, Award, TrendingUp, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { courses } from '@/data/courses';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -95,14 +96,21 @@ const About = () => {
             <h2 className={`text-3xl font-bold mb-12 ${titleClr}`}>Programs Overview</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {mainPrograms.map((program, idx) => (
-                <div key={idx} className={`${cardBg} ${cardGlow} p-8 rounded-2xl transition-all duration-300`}>
-                  <div className={`inline-flex items-center justify-center p-3 rounded-xl mb-4 ${accentBg}`}>
+                <Link 
+                  key={idx} 
+                  to={`/programs/${program.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+                  className={`${cardBg} ${cardGlow} p-8 rounded-3xl border transition-all duration-500 hover:scale-105 hover:-translate-y-1.5 flex flex-col text-left`}
+                >
+                  <div className={`inline-flex items-center justify-center p-3 rounded-2xl mb-5 w-fit ${accentBg}`}>
                     <Target className={`h-6 w-6 ${accentClr}`} />
                   </div>
-                  <h3 className={`text-xl font-bold mb-2 ${titleClr}`}>{program.title}</h3>
-                  <div className={`text-sm font-semibold mb-3 ${accentClr}`}>{program.duration} Framework</div>
-                  <p className={`text-xs ${mutedClr}`}>Structured paths for specialized outcomes.</p>
-                </div>
+                  <h3 className={`text-xl font-extrabold mb-2 ${titleClr}`}>{program.title}</h3>
+                  <div className={`text-xs font-bold uppercase tracking-wider mb-3 ${accentClr}`}>{program.duration} Track · MSME Certified</div>
+                  <p className={`text-xs leading-relaxed ${mutedClr} mb-4`}>{program.description}</p>
+                  <span className={`mt-auto inline-flex items-center text-xs font-bold ${accentClr}`}>
+                    Explore Program &rarr;
+                  </span>
+                </Link>
               ))}
             </div>
           </div>
@@ -113,17 +121,33 @@ const About = () => {
       <section className={`${sec2Bg} py-20`}>
         <div className="container mx-auto px-4">
           <div className={`${cardBg} ${cardGlow} max-w-4xl mx-auto rounded-3xl p-8 md:p-12 transition-all duration-300`}>
-            <h2 className={`text-3xl font-bold text-center mb-8 ${titleClr}`}>Our Location</h2>
-            <div className={`flex items-center justify-center gap-3 mb-8 text-sm md:text-base font-medium ${mutedClr}`}>
-              <MapPin className={`h-6 w-6 flex-shrink-0 ${accentClr}`} />
-              <p className="text-center">
-                #84, 2nd floor, Guniagrahara, Annapoorneshwari Layout, <br className="hidden md:block" />
-                Near ATD Provision Store, Lakshmi pura cross, Shivakote Post, Bangalore - 89
+            <h2 className={`text-3xl font-bold text-center mb-6 ${titleClr}`}>Our Location</h2>
+            <div className={`flex flex-col items-center justify-center gap-3 mb-8 text-sm md:text-base font-medium ${mutedClr}`}>
+              <div className="flex items-center gap-2">
+                <MapPin className={`h-6 w-6 flex-shrink-0 ${accentClr}`} />
+                <span className={`font-bold ${titleClr}`}>EdSec Innovations Headquarters</span>
+              </div>
+              <p className="text-center max-w-2xl leading-relaxed">
+                #84, 2nd floor, Annapoorneshwari Layout, Guniagrahara, <br className="hidden md:block" />
+                Near ATD Provision Store, Lakshmi Pura Cross, Shivakote Post, Bangalore, Karnataka - 560089
               </p>
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Edsec+Innovations+Bengaluru"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-full border transition-all duration-300 hover:scale-105 mt-2 ${
+                  isDark
+                    ? 'border-[#14B8A6]/40 text-[#2DD4BF] hover:bg-[#14B8A6]/10'
+                    : 'border-[#0D9488]/40 text-[#0D9488] hover:bg-[#0D9488]/10'
+                }`}
+              >
+                📍 Open in Google Maps &amp; Get Directions &rarr;
+              </a>
             </div>
-            <div className={`w-full h-[400px] rounded-2xl overflow-hidden shadow-xl border transition-all duration-300 ${isDark ? 'border-[rgba(20,184,166,0.2)]' : 'border-[rgba(13,148,136,0.15)]'}`}>
+            <div className={`w-full h-[420px] rounded-2xl overflow-hidden shadow-xl border transition-all duration-300 ${isDark ? 'border-[rgba(20,184,166,0.2)]' : 'border-[rgba(13,148,136,0.15)]'}`}>
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.685351664168!2d77.51468651037233!3d13.055694887224095!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae235735f4dd35%3A0xe5a3e1eb32c3c6f6!2sGuniagrahara%2C%20Bengaluru%2C%20Karnataka%20560090!5e0!3m2!1sen!2sin!4v1709403165203!5m2!1sen!2sin"
+                title="Edsec Innovations Location Map"
+                src="https://maps.google.com/maps?q=Edsec+Innovations,+Bengaluru&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

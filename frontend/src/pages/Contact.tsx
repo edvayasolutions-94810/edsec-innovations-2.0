@@ -147,9 +147,20 @@ const Contact = () => {
               {/* Map */}
               <div className={`${cardBg} border rounded-2xl overflow-hidden transition-all duration-300 ${cardGlow}`}>
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3886.685351664168!2d77.51468651037233!3d13.055694887224095!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae235735f4dd35%3A0xe5a3e1eb32c3c6f6!2sGuniagrahara%2C%20Bengaluru%2C%20Karnataka%20560090!5e0!3m2!1sen!2sin!4v1709403165203!5m2!1sen!2sin"
+                  title="Edsec Innovations Office Map"
+                  src="https://maps.google.com/maps?q=Edsec+Innovations,+Bengaluru&t=&z=15&ie=UTF8&iwloc=&output=embed"
                   width="100%" height="220" style={{ border: 0 }} allowFullScreen loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade" className="rounded-2xl" />
+                <div className="p-3 text-center border-t border-slate-200/10">
+                  <a
+                    href="https://www.google.com/maps/search/?api=1&query=Edsec+Innovations+Bengaluru"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`text-xs font-bold hover:underline ${accentClr}`}
+                  >
+                    📍 Open in Google Maps &rarr;
+                  </a>
+                </div>
               </div>
             </div>
           </div>
