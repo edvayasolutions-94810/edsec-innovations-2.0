@@ -14,6 +14,15 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { toast } from 'sonner';
 import { FileDown, Mail, Phone, User, KeyRound, ArrowRight, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 
+const getApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl || envUrl.includes('your-edsec-backend') || (envUrl.includes('localhost') && window.location.hostname !== 'localhost')) {
+    return '/api';
+  }
+  return envUrl.endsWith('/') ? `${envUrl}api` : `${envUrl}/api`;
+};
+const API_URL = getApiUrl();
+
 interface BrochureGateProps {
   programId: string;
   programTitle?: string;
@@ -122,7 +131,7 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
     setErrors({});
 
     try {
-      const response = await fetch('/api/brochures/request-otp', {
+      const response = await fetch(`${API_URL}/brochures/request-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -166,7 +175,7 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
     setErrors({});
 
     try {
-      const response = await fetch('/api/brochures/verify-otp', {
+      const response = await fetch(`${API_URL}/brochures/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -211,7 +220,7 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
   // Helper to fetch file via validated single-use token and save blob
   const triggerDownload = async (token: string) => {
     try {
-      const downloadUrl = `/api/brochures/download?token=${encodeURIComponent(token)}`;
+      const downloadUrl = `${API_URL}/brochures/download?token=${encodeURIComponent(token)}`;
       const res = await fetch(downloadUrl);
 
       if (!res.ok) {
