@@ -317,14 +317,14 @@ const PythonBackground = ({ color }: { color: string }) => {
   );
 };
 
-// Digital Marketing themed background - Social icons and engagement symbols
-const MarketingBackground = ({ color }: { color: string }) => {
-  const marketingSymbols = ['@', '#', '♥', '↗', '📈', '🎯', '💬', '👁', '🔔', '$'];
+// Git & Career themed background - Version control and career symbols
+const GitCareerBackground = ({ color }: { color: string }) => {
+  const gitSymbols = ['git', 'push', 'pull', 'merge', 'PR', 'commit', 'branch', 'CV'];
 
   return (
     <group>
-      {/* Social/marketing symbols */}
-      {marketingSymbols.map((sym, i) => (
+      {/* Git/Career symbols */}
+      {gitSymbols.map((sym, i) => (
         <Float key={i} speed={0.6 + Math.random() * 0.5} floatIntensity={0.45}>
           <Text
             position={[
@@ -367,23 +367,14 @@ const MarketingBackground = ({ color }: { color: string }) => {
 // Get appropriate background based on course ID
 const CourseBackground = ({ courseId, color }: { courseId: string; color: string }) => {
   switch (courseId) {
-    case 'data-science':
+    case 'generative-ai':
       return <DataScienceBackground color={color} />;
-    case 'data-analytics':
-      return <DataAnalyticsBackground color={color} />;
-    case 'python-sql':
-    case 'python-basics':
+    case 'python-ai-ml':
       return <PythonBackground color={color} />;
-    case 'full-stack':
+    case 'full-stack-web-dev':
       return <FullStackBackground color={color} />;
-    case 'web-development':
-      return <WebDevBackground color={color} />;
-    case 'digital-marketing':
-      return <MarketingBackground color={color} />;
-    case 'sql-language':
-      return <DataAnalyticsBackground color={color} />;
-    case 'augmented-reality':
-      return <DataScienceBackground color={color} />;
+    case 'git-resume':
+      return <GitCareerBackground color={color} />;
     default:
       return <DataScienceBackground color={color} />;
   }
@@ -620,15 +611,10 @@ const FlowchartScene = ({ courseTitle, features, theme = 'tech', courseId }: Flo
 
 // Map course IDs to themes
 const courseThemeMap: Record<string, 'tech' | 'nature' | 'gradient' | 'minimal' | 'warm'> = {
-  'data-science': 'tech',
-  'data-analytics': 'gradient',
-  'python-sql': 'nature',
-  'full-stack': 'minimal',
-  'web-development': 'warm',
-  'python-basics': 'nature',
-  'augmented-reality': 'gradient',
-  'sql-language': 'tech',
-  'digital-marketing': 'warm'
+  'generative-ai': 'tech',
+  'python-ai-ml': 'nature',
+  'full-stack-web-dev': 'minimal',
+  'git-resume': 'warm'
 };
 
 interface SyllabusFlowchart3DContainerProps extends SyllabusFlowchart3DProps {

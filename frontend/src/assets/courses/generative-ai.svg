@@ -1,0 +1,59 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#081014" />
+      <stop offset="50%" stop-color="#0D1F23" />
+      <stop offset="100%" stop-color="#0A1519" />
+    </linearGradient>
+    <linearGradient id="neonTeal" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#14B8A6" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+    <linearGradient id="glowCircle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14B8A6" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#bgGrad)" />
+
+  <g stroke="#14B8A6" stroke-opacity="0.07" stroke-width="1">
+    <line x1="0" y1="100" x2="800" y2="100" />
+    <line x1="0" y1="200" x2="800" y2="200" />
+    <line x1="0" y1="300" x2="800" y2="300" />
+    <line x1="0" y1="400" x2="800" y2="400" />
+    <line x1="160" y1="0" x2="160" y2="500" />
+    <line x1="320" y1="0" x2="320" y2="500" />
+    <line x1="480" y1="0" x2="480" y2="500" />
+    <line x1="640" y1="0" x2="640" y2="500" />
+  </g>
+
+  <circle cx="400" cy="210" r="140" fill="url(#glowCircle)" />
+  <circle cx="400" cy="210" r="90" fill="#14B8A6" fill-opacity="0.1" stroke="#14B8A6" stroke-opacity="0.4" stroke-width="2" stroke-dasharray="6 4" />
+  
+  <g stroke="#14B8A6" stroke-opacity="0.35" stroke-width="1.5">
+    <line x1="400" y1="210" x2="310" y2="140" />
+    <line x1="400" y1="210" x2="490" y2="140" />
+    <line x1="400" y1="210" x2="280" y2="260" />
+    <line x1="400" y1="210" x2="520" y2="260" />
+    <line x1="400" y1="210" x2="400" y2="320" />
+    <line x1="310" y1="140" x2="490" y2="140" />
+    <line x1="280" y1="260" x2="400" y2="320" />
+    <line x1="520" y1="260" x2="400" y2="320" />
+  </g>
+
+  <circle cx="400" cy="210" r="18" fill="#14B8A6" filter="url(#glow)" />
+  <circle cx="400" cy="210" r="10" fill="#FFFFFF" />
+  <circle cx="310" cy="140" r="9" fill="#06B6D4" />
+  <circle cx="490" cy="140" r="9" fill="#06B6D4" />
+  <circle cx="280" cy="260" r="8" fill="#2DD4BF" />
+  <circle cx="520" cy="260" r="8" fill="#2DD4BF" />
+  <circle cx="400" cy="320" r="10" fill="#10B981" />
+
+  <rect x="250" y="380" width="300" height="42" rx="21" fill="#0F2428" stroke="#14B8A6" stroke-opacity="0.3" stroke-width="1.5" />
+  <text x="400" y="407" fill="#E6FFFA" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="700" text-anchor="middle" letter-spacing="1.5">GENERATIVE AI &amp; LLMS</text>
+</svg>

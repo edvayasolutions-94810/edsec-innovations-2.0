@@ -144,7 +144,7 @@ const CourseComparison = () => {
                       )}
                     </div>
 
-                    <Link to={`/course/${course.id}`}>
+                    <Link to={`/programs/${course.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}>
                       <Button className={`w-full font-bold rounded-xl h-11 transition-all ${btnPrimary}`}>
                         View Details <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>

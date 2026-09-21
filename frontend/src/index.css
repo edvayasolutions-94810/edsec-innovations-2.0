@@ -130,12 +130,54 @@
   }
   .glow-button:hover::after { @apply opacity-100; translate: 100%; }
 
-  /* ── GLASSMORPHISM ───────────────────────────── */
+  /* ── GLASSMORPHISM (Design Token-Aligned) ─────── */
   .glassmorphism {
-    background: rgba(20,184,166,0.05);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid rgba(20,184,166,0.12);
+    background: rgba(18, 24, 24, 0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(20, 184, 166, 0.25);
+    box-shadow: 0 0 16px rgba(20, 184, 166, 0.15);
+  }
+  html.light .glassmorphism {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(13, 148, 136, 0.2);
+    box-shadow: 0 0 16px rgba(13, 148, 136, 0.1);
+  }
+
+  .glass-modal {
+    background: rgba(18, 24, 24, 0.75) !important;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(20, 184, 166, 0.25) !important;
+    box-shadow: 0 0 24px rgba(20, 184, 166, 0.2), 0 20px 40px -15px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 1.5rem !important;
+  }
+  html.light .glass-modal {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid rgba(13, 148, 136, 0.2) !important;
+    box-shadow: 0 0 20px rgba(13, 148, 136, 0.15), 0 20px 35px -15px rgba(15, 23, 42, 0.1) !important;
+  }
+
+  .glass-card {
+    background: rgba(18, 24, 24, 0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(20, 184, 166, 0.25);
+    box-shadow: 0 0 16px rgba(20, 184, 166, 0.08);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  html.light .glass-card {
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid rgba(13, 148, 136, 0.2);
+    box-shadow: 0 0 16px rgba(13, 148, 136, 0.06);
+  }
+  .glass-card:hover {
+    box-shadow: 0 0 24px rgba(20, 184, 166, 0.45);
+    border-color: rgba(20, 184, 166, 0.5);
+  }
+  html.light .glass-card:hover {
+    box-shadow: 0 0 20px rgba(13, 148, 136, 0.35);
+    border-color: rgba(13, 148, 136, 0.4);
   }
 
   /* ── STRUCTURAL ──────────────────────────────── */

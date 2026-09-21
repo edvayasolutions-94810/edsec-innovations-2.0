@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const Student = require('../models/Student');
 const Batch = require('../models/Batch');
 const { 
@@ -111,7 +110,7 @@ const enrollStudent = async (req, res) => {
         res.status(201).json({ message: '✅ Enrollment submitted successfully. Our team has received your application and will contact you shortly.' });
     } catch (err) {
         console.error('SERVER ERROR DURING ENROLL:', err.message);
-        res.status(500).json({ error: err.message, stack: err.stack });
+        res.status(500).json({ message: 'An error occurred during enrollment. Please try again later.' });
     }
 };
 
@@ -186,28 +185,6 @@ const acceptStudent = async (req, res) => {
             { $set: { status: 'Selected' } },
             { new: true }
         ).select('-password_hash');
-
-        res.json(student);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-};
-
-// @route   POST /api/students/login
-// @desc    Login student via email
-// @access  Public
-const loginStudent = async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) {
-            return res.status(400).json({ message: 'Email is required' });
-        }
-
-        const student = await Student.findOne({ email }).select('-password_hash');
-        if (!student) {
-            return res.status(404).json({ message: 'No enrollment found with this email' });
-        }
 
         res.json(student);
     } catch (err) {
@@ -630,7 +607,6 @@ module.exports = {
     updatePaymentStatus,
     deleteStudent,
     acceptStudent,
-    loginStudent,
     updateStudentDetails,
     updateStudentStatus,
     addStudentNote,

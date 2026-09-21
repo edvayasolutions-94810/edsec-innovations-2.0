@@ -10,7 +10,6 @@ const resources = {
             "nav": {
                 "home": "Home",
                 "courses": "Courses",
-                "internship": "Internship",
                 "about": "About",
                 "contact": "Contact us"
             },
@@ -26,7 +25,6 @@ const resources = {
             "nav": {
                 "home": "मुख्य पृष्ठ",
                 "courses": "पाठ्यक्रम",
-                "internship": "इंटर्नशिप",
                 "about": "हमारे बारे में",
                 "contact": "संपर्क करें"
             },
@@ -42,7 +40,6 @@ const resources = {
             "nav": {
                 "home": "ಮುಖಪುಟ",
                 "courses": "ಕೋರ್ಸುಗಳು",
-                "internship": "ಇಂಟರ್ನ್‌ಶಿಪ್",
                 "about": "ನಮ್ಮ ಬಗ್ಗೆ",
                 "contact": "ಸಂಪರ್ಕಿಸಿ"
             },

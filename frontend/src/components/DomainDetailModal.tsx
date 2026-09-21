@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { DomainData } from '@/data/domainData';
 import { useTheme } from '@/contexts/ThemeContext';
+import BrochureGate from '@/components/BrochureGate';
 
 interface Props {
   domain: DomainData;
@@ -21,8 +22,8 @@ const DomainDetailModal = ({ domain, onClose }: Props) => {
   const [openModule, setOpenModule] = useState<number | null>(0);
 
   const overlayBg  = 'fixed inset-0 z-50 flex items-center justify-center p-4';
-  const modalBg    = isDark ? 'bg-[#0D1515] border-[rgba(20,184,166,0.2)]' : 'bg-white border-[rgba(13,148,136,0.2)]';
-  const headerBg   = isDark ? 'bg-[#0B1A1A]' : 'bg-[#F0FDFA]';
+  const modalBg    = 'glass-modal';
+  const headerBg   = isDark ? 'bg-[#121818]/60' : 'bg-[#F0FDFA]/60';
   const titleClr   = isDark ? 'text-[#E6FFFA]' : 'text-[#0F172A]';
   const mutedClr   = isDark ? 'text-[#94A3B8]' : 'text-[#64748B]';
   const accentClr  = isDark ? 'text-[#14B8A6]' : 'text-[#0D9488]';
@@ -41,7 +42,7 @@ const DomainDetailModal = ({ domain, onClose }: Props) => {
   return (
     <div className={overlayBg} style={{ backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}>
       <div
-        className={`${modalBg} border rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl`}
+        className={`${modalBg} rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -136,27 +137,11 @@ const DomainDetailModal = ({ domain, onClose }: Props) => {
               <p className={`text-sm font-bold ${titleClr}`}>{domain.programTitle} · ₹{domain.price}</p>
             </div>
             <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-              {domain.brochureUrl && (
-                <a
-                  href={domain.brochureUrl}
-                  download={domain.brochureFilename}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-full sm:w-auto"
-                >
-                  <Button
-                    variant="outline"
-                    className={`w-full sm:w-auto h-11 px-5 font-semibold rounded-xl border flex items-center justify-center gap-2 transition-all duration-300 ${
-                      isDark
-                        ? 'border-[rgba(20,184,166,0.35)] text-[#14B8A6] hover:bg-[#14B8A6]/10'
-                        : 'border-[rgba(13,148,136,0.35)] text-[#0D9488] hover:bg-[#0D9488]/10'
-                    }`}
-                  >
-                    📄 Download Brochure
-                  </Button>
-                </a>
-              )}
+              <BrochureGate
+                programId={domain.programId}
+                programTitle={domain.programTitle}
+                triggerClassName="w-full sm:w-auto h-11 px-5"
+              />
               <Link to="/enroll" state={{ predefinedCourse: domain.programTitle, domain: domain.name }} onClick={onClose} className="w-full sm:w-auto">
                 <Button className={`w-full sm:w-auto h-11 px-7 font-bold rounded-xl transition-all duration-300 glow-button ${btnClass}`}>
                   Enroll Now →

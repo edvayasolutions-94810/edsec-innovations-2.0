@@ -147,18 +147,45 @@ interface CourseDb {
     syllabus_download_enabled: boolean;
 }
 
+interface BrochureLead {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    programId: string;
+    verified: boolean;
+    downloadTokenUsed: boolean;
+    createdAt: string;
+    twoFactorSessionId?: string;
+}
+
+const PROGRAM_TITLES_MAP: Record<string, string> = {
+    'full-stack-web-dev': 'Full Stack Web Development',
+    'generative-ai': 'Generative AI',
+    'python-ai-ml': 'Python with AI/ML',
+    'git-resume': 'Git & Resume'
+};
+
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const { isDark, toggleTheme } = useTheme();
     
     // Tab Navigation State
-    const [activeTab, setActiveTab] = useState<'analytics' | 'crm' | 'batches' | 'syllabus'>('crm');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'crm' | 'batches' | 'syllabus' | 'brochures'>('crm');
 
     // Data States
     const [students, setStudents] = useState<Student[]>([]);
     const [batches, setBatches] = useState<Batch[]>([]);
     const [dbCourses, setDbCourses] = useState<CourseDb[]>([]);
+    const [brochureLeads, setBrochureLeads] = useState<BrochureLead[]>([]);
     const [loading, setLoading] = useState(true);
+    const [loadingLeads, setLoadingLeads] = useState(false);
+
+    // Brochure Leads Filters
+    const [leadSearchQuery, setLeadSearchQuery] = useState('');
+    const [leadFilterProgram, setLeadFilterProgram] = useState('all');
+    const [leadFilterVerified, setLeadFilterVerified] = useState('all');
+    const [leadFilterDownloaded, setLeadFilterDownloaded] = useState('all');
 
     // Advanced Search & Multi-Filters
     const [searchQuery, setSearchQuery] = useState('');
@@ -232,13 +259,77 @@ const AdminDashboard = () => {
             await Promise.all([
                 fetchStudents(),
                 fetchBatches(),
-                fetchCourses()
+                fetchCourses(),
+                fetchBrochureLeads()
             ]);
         } catch (err) {
             console.error(err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchBrochureLeads = async () => {
+        setLoadingLeads(true);
+        try {
+            const res = await axios.get(`${API_URL}/brochures/leads`, {
+                headers: { 
+                    Authorization: `Bearer ${getToken()}`,
+                    'x-auth-token': getToken()
+                }
+            });
+            if (res.data && res.data.leads) {
+                setBrochureLeads(res.data.leads);
+            }
+        } catch (err: any) {
+            console.error('Failed to fetch brochure leads', err);
+            toast.error('Could not load brochure download leads.');
+        } finally {
+            setLoadingLeads(false);
+        }
+    };
+
+    const handleDeleteLead = async (id: string, name: string) => {
+        if (!window.confirm(`Are you sure you want to delete the brochure download record for "${name}"?`)) return;
+        try {
+            await axios.delete(`${API_URL}/brochures/leads/${id}`, {
+                headers: { 
+                    Authorization: `Bearer ${getToken()}`,
+                    'x-auth-token': getToken()
+                }
+            });
+            setBrochureLeads(prev => prev.filter(l => l._id !== id));
+            toast.success('Brochure lead deleted successfully');
+        } catch (err: any) {
+            console.error('Failed to delete lead', err);
+            toast.error('Could not delete lead');
+        }
+    };
+
+    const exportLeadsToCSV = () => {
+        if (!brochureLeads.length) {
+            toast.error('No leads available to export.');
+            return;
+        }
+        const headers = ['Name', 'Email', 'Phone', 'Program Requested', 'SMS OTP Verified', 'Brochure Downloaded', 'Requested At'];
+        const rows = brochureLeads.map(l => [
+            `"${(l.name || '').replace(/"/g, '""')}"`,
+            `"${(l.email || '').replace(/"/g, '""')}"`,
+            `"${l.phone || ''}"`,
+            `"${(PROGRAM_TITLES_MAP[l.programId] || l.programId || '').replace(/"/g, '""')}"`,
+            l.verified ? 'Yes' : 'No',
+            l.downloadTokenUsed ? 'Yes' : 'No',
+            `"${new Date(l.createdAt).toLocaleString()}"`
+        ]);
+        const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', `EdSec_Brochure_Leads_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Brochure leads exported to CSV!');
     };
 
     const fetchStudents = async () => {
@@ -829,6 +920,39 @@ const AdminDashboard = () => {
     const totalPending = students.reduce((sum, s) => sum + (s.remaining_balance || 0), 0);
     const collectionPercentage = totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0;
 
+    // Brochure Leads Analytics & Filtered List
+    const totalBrochureLeads = brochureLeads.length;
+    const verifiedLeadsCount = brochureLeads.filter(l => l.verified).length;
+    const downloadedLeadsCount = brochureLeads.filter(l => l.downloadTokenUsed).length;
+    const verifiedPercentage = totalBrochureLeads > 0 ? Math.round((verifiedLeadsCount / totalBrochureLeads) * 100) : 0;
+    const downloadedPercentage = totalBrochureLeads > 0 ? Math.round((downloadedLeadsCount / totalBrochureLeads) * 100) : 0;
+
+    // Most popular brochure requested
+    const programFrequencyMap: Record<string, number> = {};
+    brochureLeads.forEach(l => {
+        if (l.programId) {
+            programFrequencyMap[l.programId] = (programFrequencyMap[l.programId] || 0) + 1;
+        }
+    });
+    const topProgramPair = Object.entries(programFrequencyMap).sort((a, b) => b[1] - a[1])[0];
+    const topProgramTitle = topProgramPair ? (PROGRAM_TITLES_MAP[topProgramPair[0]] || topProgramPair[0]) : 'None yet';
+
+    const filteredBrochureLeads = brochureLeads.filter(lead => {
+        const query = leadSearchQuery.toLowerCase().trim();
+        const matchesSearch = !query ||
+            (lead.name && lead.name.toLowerCase().includes(query)) ||
+            (lead.email && lead.email.toLowerCase().includes(query)) ||
+            (lead.phone && lead.phone.includes(query));
+        const matchesProgram = leadFilterProgram === 'all' || lead.programId === leadFilterProgram;
+        const matchesVerified = leadFilterVerified === 'all' || 
+            (leadFilterVerified === 'verified' && lead.verified) ||
+            (leadFilterVerified === 'pending' && !lead.verified);
+        const matchesDownloaded = leadFilterDownloaded === 'all' ||
+            (leadFilterDownloaded === 'downloaded' && lead.downloadTokenUsed) ||
+            (leadFilterDownloaded === 'not_downloaded' && !lead.downloadTokenUsed);
+        return matchesSearch && matchesProgram && matchesVerified && matchesDownloaded;
+    });
+
     // Theme Variables
     const pageBg     = isDark ? 'bg-[#0B0F0F] text-[#E6FFFA]' : 'bg-[#F8FAFC] text-slate-900';
     const titleClr   = isDark ? 'text-[#E6FFFA]' : 'text-[#0F172A]';
@@ -936,6 +1060,24 @@ const AdminDashboard = () => {
                             }`}
                         >
                             <Settings className="h-4 w-4" /> Syllabus Settings
+                        </button>
+                        <button
+                            onClick={() => {
+                                setActiveTab('brochures');
+                                if (!brochureLeads.length) fetchBrochureLeads();
+                            }}
+                            className={`px-4 py-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition-all ${
+                                activeTab === 'brochures'
+                                    ? 'border-[#14B8A6] text-[#14B8A6]'
+                                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-[#99F6E4]'
+                            }`}
+                        >
+                            <FileText className="h-4 w-4" /> Brochure Downloads
+                            {totalBrochureLeads > 0 && (
+                                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-[#14B8A6]/20 text-[#14B8A6] font-bold">
+                                    {totalBrochureLeads}
+                                </span>
+                            )}
                         </button>
                     </div>
 
@@ -1556,6 +1698,333 @@ const AdminDashboard = () => {
                                         </div>
                                     </CardContent>
                                 </Card>
+                            )}
+
+                            {/* Tab 5: Brochure Downloads */}
+                            {activeTab === 'brochures' && (
+                                <div className="space-y-6">
+                                    {/* Header and Actions Bar */}
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                        <div>
+                                            <h2 className={`text-xl font-bold flex items-center gap-2 ${titleClr}`}>
+                                                <FileText className="h-5 w-5 text-[#14B8A6]" /> Brochure Download Leads
+                                            </h2>
+                                            <p className={`text-xs mt-1 ${mutedClr}`}>
+                                                Prospective students who verified via 2Factor SMS OTP and accessed program brochures.
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                                            <Button
+                                                onClick={fetchBrochureLeads}
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={loadingLeads}
+                                                className={`gap-1.5 ${btnSecondary}`}
+                                            >
+                                                <RefreshCw className={`h-3.5 w-3.5 ${loadingLeads ? 'animate-spin' : ''}`} />
+                                                Refresh
+                                            </Button>
+                                            <Button
+                                                onClick={exportLeadsToCSV}
+                                                size="sm"
+                                                className="gap-1.5 bg-[#14B8A6] hover:bg-[#0D9488] text-slate-950 font-bold border-0 shadow-sm"
+                                            >
+                                                <Download className="h-3.5 w-3.5" /> Export CSV
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {/* 4 Stat Overview Cards */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <Card className={`${cardBg} ${cardShadow}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div>
+                                                    <p className={`text-xs font-semibold uppercase tracking-wider ${mutedClr}`}>Total Inquiries</p>
+                                                    <h3 className={`text-2xl font-extrabold mt-1 ${titleClr}`}>{totalBrochureLeads}</h3>
+                                                    <span className="text-[10px] text-teal-400 font-semibold">All-time brochure leads</span>
+                                                </div>
+                                                <div className={`p-3 rounded-xl ${iconBg}`}>
+                                                    <Users className="h-5 w-5 text-[#14B8A6]" />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className={`${cardBg} ${cardShadow}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div>
+                                                    <p className={`text-xs font-semibold uppercase tracking-wider ${mutedClr}`}>SMS OTP Verified</p>
+                                                    <h3 className={`text-2xl font-extrabold mt-1 ${titleClr}`}>{verifiedLeadsCount}</h3>
+                                                    <span className="text-[10px] text-emerald-400 font-semibold">{verifiedPercentage}% verified mobile numbers</span>
+                                                </div>
+                                                <div className={`p-3 rounded-xl ${iconBg}`}>
+                                                    <CheckCircle className="h-5 w-5 text-emerald-500" />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className={`${cardBg} ${cardShadow}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div>
+                                                    <p className={`text-xs font-semibold uppercase tracking-wider ${mutedClr}`}>Downloaded PDFs</p>
+                                                    <h3 className={`text-2xl font-extrabold mt-1 ${titleClr}`}>{downloadedLeadsCount}</h3>
+                                                    <span className="text-[10px] text-teal-400 font-semibold">{downloadedPercentage}% brochure completion</span>
+                                                </div>
+                                                <div className={`p-3 rounded-xl ${iconBg}`}>
+                                                    <Download className="h-5 w-5 text-[#14B8A6]" />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className={`${cardBg} ${cardShadow}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div className="truncate mr-2">
+                                                    <p className={`text-xs font-semibold uppercase tracking-wider ${mutedClr}`}>Top Program</p>
+                                                    <h3 className={`text-base font-extrabold mt-1 truncate ${titleClr}`}>{topProgramTitle}</h3>
+                                                    <span className="text-[10px] text-amber-400 font-semibold">Highest interest</span>
+                                                </div>
+                                                <div className={`p-3 rounded-xl ${iconBg} flex-shrink-0`}>
+                                                    <Award className="h-5 w-5 text-amber-500" />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+
+                                    {/* Search & Multi-Filters Card */}
+                                    <Card className={`${cardBg}`}>
+                                        <CardContent className="p-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                                                {/* Search Input */}
+                                                <div className="relative">
+                                                    <Search className="absolute left-3 top-2.5 h-4 w-4 opacity-50" />
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Search name, email, phone..."
+                                                        value={leadSearchQuery}
+                                                        onChange={(e) => setLeadSearchQuery(e.target.value)}
+                                                        className={`pl-9 h-9 text-xs rounded-xl ${inputBg}`}
+                                                    />
+                                                    {leadSearchQuery && (
+                                                        <button
+                                                            onClick={() => setLeadSearchQuery('')}
+                                                            className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-200"
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {/* Program Filter */}
+                                                <Select value={leadFilterProgram} onValueChange={setLeadFilterProgram}>
+                                                    <SelectTrigger className={`h-9 text-xs rounded-xl ${inputBg}`}>
+                                                        <SelectValue placeholder="All Programs" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All Programs</SelectItem>
+                                                        <SelectItem value="full-stack-web-dev">Full Stack Web Development</SelectItem>
+                                                        <SelectItem value="generative-ai">Generative AI</SelectItem>
+                                                        <SelectItem value="python-ai-ml">Python with AI/ML</SelectItem>
+                                                        <SelectItem value="git-resume">Git & Resume</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+
+                                                {/* SMS Verified Filter */}
+                                                <Select value={leadFilterVerified} onValueChange={setLeadFilterVerified}>
+                                                    <SelectTrigger className={`h-9 text-xs rounded-xl ${inputBg}`}>
+                                                        <SelectValue placeholder="SMS Verification" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All Verifications</SelectItem>
+                                                        <SelectItem value="verified">SMS Verified Only</SelectItem>
+                                                        <SelectItem value="pending">Pending Only</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+
+                                                {/* Download Status Filter */}
+                                                <Select value={leadFilterDownloaded} onValueChange={setLeadFilterDownloaded}>
+                                                    <SelectTrigger className={`h-9 text-xs rounded-xl ${inputBg}`}>
+                                                        <SelectValue placeholder="Download Status" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All Download Statuses</SelectItem>
+                                                        <SelectItem value="downloaded">Downloaded Only</SelectItem>
+                                                        <SelectItem value="not_downloaded">Not Downloaded</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            
+                                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-[rgba(20,184,166,0.1)] text-xs">
+                                                <span className={mutedClr}>
+                                                    Showing <strong className={titleClr}>{filteredBrochureLeads.length}</strong> of {totalBrochureLeads} total leads
+                                                </span>
+                                                {(leadSearchQuery || leadFilterProgram !== 'all' || leadFilterVerified !== 'all' || leadFilterDownloaded !== 'all') && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setLeadSearchQuery('');
+                                                            setLeadFilterProgram('all');
+                                                            setLeadFilterVerified('all');
+                                                            setLeadFilterDownloaded('all');
+                                                        }}
+                                                        className="text-teal-500 hover:underline font-semibold"
+                                                    >
+                                                        Clear all filters
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Leads Table */}
+                                    <Card className={`border ${cardBg}`}>
+                                        <CardContent className="p-0">
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left border-collapse whitespace-nowrap">
+                                                    <thead>
+                                                        <tr className={`border-b text-xs uppercase font-semibold ${tableHeader}`}>
+                                                            <th className="px-6 py-4">Student Details</th>
+                                                            <th className="px-6 py-4">Contact Info</th>
+                                                            <th className="px-6 py-4">Program Requested</th>
+                                                            <th className="px-6 py-4">SMS 2Factor Status</th>
+                                                            <th className="px-6 py-4">Brochure PDF</th>
+                                                            <th className="px-6 py-4">Requested Date</th>
+                                                            <th className="px-6 py-4 text-right">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-[rgba(13,148,136,0.05)]">
+                                                        {filteredBrochureLeads.map((lead) => {
+                                                            const initials = lead.name
+                                                                ? lead.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                                                                : 'ST';
+                                                            return (
+                                                                <tr key={lead._id} className={`transition-colors ${tableRowBase}`}>
+                                                                    {/* Student Details */}
+                                                                    <td className="px-6 py-4">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#14B8A6] to-[#0D9488] text-slate-950 font-bold flex items-center justify-center text-xs shadow-sm">
+                                                                                {initials}
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className={`font-semibold text-sm ${primaryText}`}>{lead.name}</p>
+                                                                                <span className={`text-[11px] ${mutedClr}`}>ID: {lead._id.slice(-6)}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+
+                                                                    {/* Contact Info */}
+                                                                    <td className="px-6 py-4">
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-1.5 text-xs">
+                                                                                <Mail className="h-3.5 w-3.5 text-slate-400" />
+                                                                                <a href={`mailto:${lead.email}`} className="hover:underline text-slate-300">
+                                                                                    {lead.email}
+                                                                                </a>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-1.5 text-xs">
+                                                                                <MessageSquare className="h-3.5 w-3.5 text-emerald-400" />
+                                                                                <a
+                                                                                    href={`https://wa.me/91${lead.phone}`}
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    className="hover:underline font-mono text-emerald-400"
+                                                                                >
+                                                                                    +91 {lead.phone}
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+
+                                                                    {/* Program Requested */}
+                                                                    <td className="px-6 py-4">
+                                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                                                                            <BookOpen className="h-3 w-3" />
+                                                                            {PROGRAM_TITLES_MAP[lead.programId] || lead.programId}
+                                                                        </span>
+                                                                    </td>
+
+                                                                    {/* SMS 2Factor Status */}
+                                                                    <td className="px-6 py-4">
+                                                                        {lead.verified ? (
+                                                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                                                                <CheckCircle className="h-3 w-3" /> SMS Verified
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                                                                <Clock className="h-3 w-3" /> Pending OTP
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+
+                                                                    {/* PDF Download Status */}
+                                                                    <td className="px-6 py-4">
+                                                                        {lead.downloadTokenUsed ? (
+                                                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-teal-500/15 text-teal-400 border border-teal-500/30">
+                                                                                <Download className="h-3 w-3" /> Downloaded
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/15 text-slate-400 border border-slate-500/30">
+                                                                                <Clock className="h-3 w-3" /> Link Generated
+                                                                            </span>
+                                                                        )}
+                                                                    </td>
+
+                                                                    {/* Requested Date */}
+                                                                    <td className="px-6 py-4 text-xs text-slate-400">
+                                                                        <div>{new Date(lead.createdAt).toLocaleDateString()}</div>
+                                                                        <div className="text-[10px] opacity-70">{new Date(lead.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                                    </td>
+
+                                                                    {/* Actions */}
+                                                                    <td className="px-6 py-4 text-right">
+                                                                        <div className="flex items-center justify-end gap-1.5">
+                                                                            <a
+                                                                                href={`https://wa.me/91${lead.phone}?text=${encodeURIComponent(`Hi ${lead.name}, thank you for your interest in the ${PROGRAM_TITLES_MAP[lead.programId] || lead.programId} program at EdSec Innovations!`)}`}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                title="Send WhatsApp Message"
+                                                                                className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                                                                            >
+                                                                                <MessageSquare className="h-4 w-4" />
+                                                                            </a>
+                                                                            <a
+                                                                                href={`mailto:${lead.email}?subject=${encodeURIComponent(`Information about ${PROGRAM_TITLES_MAP[lead.programId] || lead.programId} - EdSec Innovations`)}`}
+                                                                                title="Send Email"
+                                                                                className="p-1.5 rounded-lg bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 transition-colors"
+                                                                            >
+                                                                                <Mail className="h-4 w-4" />
+                                                                            </a>
+                                                                            <button
+                                                                                onClick={() => handleDeleteLead(lead._id, lead.name)}
+                                                                                title="Delete Lead Record"
+                                                                                className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-colors"
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </button>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                        {filteredBrochureLeads.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan={7} className={`px-6 py-12 text-center text-sm ${mutedClr}`}>
+                                                                    {loadingLeads ? (
+                                                                        <div className="flex items-center justify-center gap-2">
+                                                                            <RefreshCw className="h-4 w-4 animate-spin text-[#14B8A6]" />
+                                                                            Loading brochure download records...
+                                                                        </div>
+                                                                    ) : totalBrochureLeads === 0 ? (
+                                                                        'No brochure download inquiries recorded yet.'
+                                                                    ) : (
+                                                                        'No brochure leads match your current search/filter criteria.'
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
                             )}
                         </>
                     )}

@@ -15,30 +15,39 @@ const AdminSchema = new mongoose.Schema({
 
 const Admin = mongoose.model('Admin', AdminSchema);
 
-const ADMIN_EMAIL = 'admin@edsec.com';       // ← Change this
-const ADMIN_PASSWORD = 'Edsec@Admin2024';     // ← Change this to a strong password
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.argv[2];
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.argv[3];
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+    console.error('❌ Error: ADMIN_EMAIL and ADMIN_PASSWORD must be provided via environment variables or command line arguments:');
+    console.error('   Usage: node setup-admin.js <email> <password>');
+    console.error('   Or: ADMIN_EMAIL=... ADMIN_PASSWORD=... node setup-admin.js');
+    process.exit(1);
+}
 
 async function setup() {
     const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+    if (!uri) {
+        console.error('❌ Error: MONGODB_URI environment variable is required.');
+        process.exit(1);
+    }
     await mongoose.connect(uri);
     console.log('✅ Connected to MongoDB');
 
     const existing = await Admin.findOne({ $or: [{ email: ADMIN_EMAIL }, { username: ADMIN_EMAIL }] });
     if (existing) {
         console.log('⚠️  Admin already exists. Updating password...');
-        const hash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+        const hash = await bcrypt.hash(ADMIN_PASSWORD, 12);
         await Admin.updateOne({ _id: existing._id }, { password_hash: hash, email: ADMIN_EMAIL, username: ADMIN_EMAIL });
         console.log('✅ Admin password updated.');
     } else {
-        const hash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+        const hash = await bcrypt.hash(ADMIN_PASSWORD, 12);
         await Admin.create({ email: ADMIN_EMAIL, username: ADMIN_EMAIL, password_hash: hash });
         console.log(`✅ Admin created: ${ADMIN_EMAIL}`);
     }
 
     await mongoose.disconnect();
-    console.log('\n🎉 Done! You can now login at http://localhost:8080/#/admin-login');
-    console.log(`   Email:    ${ADMIN_EMAIL}`);
-    console.log(`   Password: ${ADMIN_PASSWORD}`);
+    console.log('\n🎉 Admin account successfully configured.');
 }
 
 setup().catch(err => { console.error(err); process.exit(1); });

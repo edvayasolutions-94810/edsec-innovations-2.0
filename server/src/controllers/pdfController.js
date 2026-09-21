@@ -5,19 +5,28 @@ const Course = require('../models/Course');
 const Syllabus = require('../models/Syllabus');
 const Student = require('../models/Student');
 
+const escapeRegex = (str) => {
+    return typeof str === 'string' ? str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
+};
+
 // @route   GET /api/courses/:id/syllabus-pdf
 // @desc    Download syllabus as PDF
 // @access  Public (Checked by backend flag)
 const downloadSyllabusPDF = async (req, res) => {
     try {
+        if (!req.params.id || typeof req.params.id !== 'string') {
+            return res.status(400).json({ message: 'Invalid course identifier' });
+        }
+
         // Try finding by ID first, then fallback to finding by title (to support URL slugs like 'full-stack-web-development')
-        const searchTitle = req.params.id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+        const rawTitle = req.params.id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         let course;
 
         if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
             course = await Course.findById(req.params.id);
         } else {
-            course = await Course.findOne({ title: new RegExp(searchTitle, 'i') });
+            const safePattern = new RegExp(`^${escapeRegex(rawTitle)}$`, 'i');
+            course = await Course.findOne({ title: safePattern });
         }
 
         if (!course) {
@@ -34,8 +43,9 @@ const downloadSyllabusPDF = async (req, res) => {
         // Generate PDF on the fly
         const doc = new PDFDocument({ margin: 50 });
 
-        // Setup response headers
-        res.setHeader('Content-disposition', `attachment; filename="${course.title.replace(/\s+/g, '_')}_Syllabus.pdf"`);
+        // Setup response headers (sanitizing title for Content-Disposition)
+        const safeFilename = course.title.replace(/[^a-zA-Z0-9_\-]/g, '_');
+        res.setHeader('Content-disposition', `attachment; filename="${safeFilename}_Syllabus.pdf"`);
         res.setHeader('Content-type', 'application/pdf');
 
         // Pipe the PDF directly to the response

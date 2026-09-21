@@ -1,0 +1,45 @@
+services:
+  # Backend API Service
+  - type: web
+    name: edsec-backend
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: TF_API
+        sync: false
+      - key: TF_TEMPLATE_NAME
+        value: RegistrationOTP
+
+  # Frontend Static Site
+  - type: web
+    name: edsec-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

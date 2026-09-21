@@ -12,7 +12,8 @@ const StudentSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: true
+        required: true,
+        index: true
     },
     whatsapp_number: {
         type: String,
@@ -32,7 +33,8 @@ const StudentSchema = new mongoose.Schema({
     },
     course_name: {
         type: String,
-        required: true
+        required: false,
+        default: 'General'
     },
     course_duration: {
         type: String,

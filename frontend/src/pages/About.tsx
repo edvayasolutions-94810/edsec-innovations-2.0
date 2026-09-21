@@ -10,13 +10,11 @@ const About = () => {
   const { isDark } = useTheme();
 
   const goals = [
-    { icon: Award, title: 'Certified Excellence', description: 'Providing MSME certified internship opportunities that are recognized across industries' },
+    { icon: Award, title: 'Certified Excellence', description: 'Providing MSME certified programs that are recognized across industries' },
     { icon: Users, title: 'Real-World Experience', description: 'Offering hands-on project exposure with mentorship from industry experts' },
     { icon: TrendingUp, title: 'Career Growth', description: 'Building practical skills that accelerate career advancement and job readiness' },
-    { icon: Target, title: 'Expanding Horizons', description: 'Growing into non-technical programs to serve diverse learning needs' }
+    { icon: Target, title: 'Expanding Horizons', description: 'Growing into diverse technology and career acceleration programs' }
   ];
-
-  const mainPrograms = courses.filter(c => c.category === 'main');
 
   const pageBg   = isDark ? 'bg-[#0B0F0F]' : 'bg-white';
   const sec2Bg   = isDark ? 'bg-[#0D1515]' : 'bg-[#F0FDFA]';
@@ -58,7 +56,7 @@ const About = () => {
             </p>
             <p className={`text-lg leading-relaxed ${mutedClr}`}>
               We bridge the gap between academic learning and industry requirements through our comprehensive
-              internship programs that combine theoretical knowledge with practical, real-world project experience.
+              technology programs that combine theoretical knowledge with practical, real-world project experience.
             </p>
           </div>
         </div>
@@ -94,19 +92,19 @@ const About = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto text-center">
             <h2 className={`text-3xl font-bold mb-12 ${titleClr}`}>Programs Overview</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {mainPrograms.map((program, idx) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {courses.map((program, idx) => (
                 <Link 
                   key={idx} 
-                  to={`/programs/${program.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-                  className={`${cardBg} ${cardGlow} p-8 rounded-3xl border transition-all duration-500 hover:scale-105 hover:-translate-y-1.5 flex flex-col text-left`}
+                  to={`/programs/${program.id}`}
+                  className={`${cardBg} ${cardGlow} p-6 rounded-3xl border transition-all duration-500 hover:scale-105 hover:-translate-y-1.5 flex flex-col text-left`}
                 >
-                  <div className={`inline-flex items-center justify-center p-3 rounded-2xl mb-5 w-fit ${accentBg}`}>
+                  <div className={`inline-flex items-center justify-center p-3 rounded-2xl mb-4 w-fit ${accentBg}`}>
                     <Target className={`h-6 w-6 ${accentClr}`} />
                   </div>
-                  <h3 className={`text-xl font-extrabold mb-2 ${titleClr}`}>{program.title}</h3>
-                  <div className={`text-xs font-bold uppercase tracking-wider mb-3 ${accentClr}`}>{program.duration} Track · MSME Certified</div>
-                  <p className={`text-xs leading-relaxed ${mutedClr} mb-4`}>{program.description}</p>
+                  <h3 className={`text-lg font-extrabold mb-1.5 ${titleClr}`}>{program.title}</h3>
+                  <div className={`text-xs font-bold uppercase tracking-wider mb-3 ${accentClr}`}>{program.duration} · MSME Certified</div>
+                  <p className={`text-xs leading-relaxed ${mutedClr} mb-4 flex-grow line-clamp-3`}>{program.description}</p>
                   <span className={`mt-auto inline-flex items-center text-xs font-bold ${accentClr}`}>
                     Explore Program &rarr;
                   </span>

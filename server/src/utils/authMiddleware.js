@@ -6,23 +6,36 @@ const authMiddleware = (roles = []) => {
             roles = [roles];
         }
 
-        const token = req.header('Authorization')?.split(' ')[1];
+        const authHeader = req.header('Authorization');
+        const token = authHeader?.startsWith('Bearer ') 
+            ? authHeader.split(' ')[1] 
+            : (authHeader || req.header('x-auth-token'));
 
         if (!token) {
             return res.status(401).json({ message: 'No token, authorization denied' });
         }
 
+        const jwtSecret = process.env.JWT_SECRET;
+        if (!jwtSecret) {
+            console.error('FATAL: JWT_SECRET environment variable is not configured');
+            return res.status(500).json({ message: 'Authentication service misconfigured' });
+        }
+
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+            const decoded = jwt.verify(token, jwtSecret);
+            if (!decoded || !decoded.user) {
+                return res.status(401).json({ message: 'Invalid token structure' });
+            }
+
             req.user = decoded.user;
 
-            if (roles.length && !roles.includes(req.user.role)) {
-                return res.status(403).json({ message: 'Role authorization failed' });
+            if (roles.length && (!req.user.role || !roles.includes(req.user.role))) {
+                return res.status(403).json({ message: 'Access denied: insufficient permissions' });
             }
 
             next();
         } catch (err) {
-            res.status(401).json({ message: 'Token is not valid' });
+            return res.status(401).json({ message: 'Token is invalid or expired' });
         }
     };
 };

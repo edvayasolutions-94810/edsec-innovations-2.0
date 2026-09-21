@@ -6,7 +6,6 @@ const {
     updatePaymentStatus, 
     deleteStudent, 
     acceptStudent, 
-    loginStudent,
     updateStudentDetails,
     updateStudentStatus,
     addStudentNote,
@@ -23,9 +22,8 @@ const {
 } = require('../controllers/pdfController');
 const authMiddleware = require('../utils/authMiddleware');
 
-// Public Route
+// Public Student Routes
 router.post('/enroll', enrollStudent);
-router.post('/login', loginStudent);
 
 // Admin Routes
 router.get('/', authMiddleware(['admin']), getStudents);

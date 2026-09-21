@@ -18,7 +18,7 @@ const Navbar = () => {
 
   const navLinks = [
     { key: 'home', path: '/' },
-    { key: 'internship', path: '/internship' },
+    { key: 'courses', path: '/courses' },
     { key: 'about', path: '/about' },
     { key: 'contact', path: '/contact' },
   ];

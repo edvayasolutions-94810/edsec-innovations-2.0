@@ -69,7 +69,7 @@ const AnimatedCounter = ({ value, duration = 1500, suffix = "" }: { value: numbe
 
 const Index = () => {
   const { isDark } = useTheme();
-  const [activeProjTab, setActiveProjTab] = useState<'python' | 'web' | 'marketing' | 'ar'>('python');
+  const [activeProjTab, setActiveProjTab] = useState<'web' | 'genai' | 'python' | 'git'>('web');
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   // Styling Tokens
@@ -103,7 +103,7 @@ const Index = () => {
       icon: Code
     },
     {
-      title: 'Internship Opportunities',
+      title: 'Practical Tech Experience',
       desc: 'Gain hands-on experience under professional mentorship to prepare for a successful career transition.',
       icon: Briefcase
     },
@@ -125,73 +125,73 @@ const Index = () => {
   ];
 
   const technologies = [
+    { name: 'Full Stack Web Dev', icon: Globe },
+    { name: 'Generative AI', icon: Cpu },
     { name: 'Python', icon: Code },
-    { name: 'SQL', icon: Database },
-    { name: 'Artificial Intelligence', icon: Cpu },
-    { name: 'Machine Learning', icon: Cpu },
-    { name: 'Data Analytics', icon: BarChart3 },
-    { name: 'Web Development', icon: Globe },
+    { name: 'Machine Learning', icon: BarChart3 },
+    { name: 'Deep Learning', icon: Cpu },
+    { name: 'React & Next.js', icon: Globe },
+    { name: 'Node.js & APIs', icon: Layers },
+    { name: 'MongoDB', icon: Database },
     { name: 'Git & GitHub', icon: GitBranch },
-    { name: 'APIs', icon: Layers },
-    { name: 'Digital Marketing', icon: Megaphone },
-    { name: 'Augmented Reality', icon: Eye }
+    { name: 'LLMs & RAG', icon: Cpu }
   ];
 
   const projects = {
-    python: [
-      { 
-        title: 'Automated Report Generator', 
-        desc: 'A utility script that parses CSV/Excel data, runs statistical models, and generates PDF charts automatically.', 
-        tags: ['Python', 'Pandas', 'ReportLab'],
-        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=500&q=80'
-      },
-      { 
-        title: 'Custom Web Scraper & Parser', 
-        desc: 'An advanced data collection tool that scrapes e-commerce pricing details and alerts users of price drops.', 
-        tags: ['Python', 'Scrapy', 'BeautifulSoup'],
-        image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=500&q=80'
-      }
-    ],
     web: [
       { 
-        title: 'E-Commerce SaaS Dashboard', 
-        desc: 'A full-stack React and Node application with integrated billing, user management, and real-time inventory tracking.', 
-        tags: ['React', 'Node.js', 'MongoDB'],
+        title: 'Full-Stack E-Commerce Platform', 
+        desc: 'A dynamic web application with React, Next.js, Node.js, and MongoDB featuring JWT authentication and real-time inventory.', 
+        tags: ['React', 'Next.js', 'Node.js', 'MongoDB'],
         image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=500&q=80'
       },
       { 
-        title: 'Real-time Chat Platform', 
-        desc: 'A Socket.io powered messaging app with chat rooms, media sharing, and real-time status indicators.', 
-        tags: ['Vite', 'Express', 'Socket.io'],
-        image: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=500&q=80'
+        title: 'AI-Integrated SaaS Dashboard', 
+        desc: 'A production web app with AI-assisted features, TypeScript type-safety, and interactive real-time metrics.', 
+        tags: ['TypeScript', 'Next.js', 'Tailwind', 'AI API'],
+        image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=500&q=80'
       }
     ],
-    marketing: [
+    genai: [
       { 
-        title: 'SEO Growth Campaign', 
-        desc: 'A multi-channel marketing campaign that increased organic search engine traffic by 180% in 30 days.', 
-        tags: ['SEO', 'Google Analytics', 'Ahrefs'],
-        image: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=500&q=80'
+        title: 'RAG Enterprise Document Assistant', 
+        desc: 'An intelligent retrieval-augmented generation system indexing PDF documentation using vector search and Claude/GPT.', 
+        tags: ['Generative AI', 'Vector DB', 'RAG', 'Python'],
+        image: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=500&q=80'
       },
       { 
-        title: 'SaaS Product Launch Ads', 
-        desc: 'A conversion-focused search and display ad campaign built on Google Ads with 4.5% click-through rate.', 
-        tags: ['Google Ads', 'Copywriting', 'Analytics'],
-        image: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=500&q=80'
+        title: 'Autonomous Multi-Modal AI Agent', 
+        desc: 'An agentic workflow system with tool calling, self-correction, vision capabilities, and LLMOps telemetry.', 
+        tags: ['AI Agents', 'LLMOps', 'Multimodal', 'LangChain'],
+        image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=500&q=80'
       }
     ],
-    ar: [
+    python: [
       { 
-        title: 'Interactive Product Catalog', 
-        desc: 'An AR portal allowing users to place and customize 3D furniture models inside their living rooms.', 
-        tags: ['Augmented Reality', 'Unity', 'ARCore'],
-        image: 'https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=500&q=80'
+        title: 'End-to-End Predictive ML Pipeline', 
+        desc: 'An automated machine learning engine handling data wrangling, feature engineering, cross-validation, and deployment.', 
+        tags: ['Python', 'NumPy', 'Pandas', 'scikit-learn'],
+        image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=500&q=80'
       },
       { 
-        title: 'Educational Space Explorer', 
-        desc: 'An immersive mobile application that projects interactive 3D solar system models onto physical markers.', 
-        tags: ['WebXR', 'Three.js', 'A-Frame'],
-        image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=500&q=80'
+        title: 'Deep Learning Vision Classifier', 
+        desc: 'A PyTorch convolutional neural network trained for high-accuracy medical image classification with model optimization.', 
+        tags: ['PyTorch', 'CNNs', 'Deep Learning', 'Matplotlib'],
+        image: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&w=500&q=80'
+      }
+    ],
+    git: [
+      { 
+        title: 'Collaborative Open-Source Framework', 
+        desc: 'A multi-developer GitHub repository with branching strategies, automated pull request validation, and CI/CD pipelines.', 
+        tags: ['Git', 'GitHub', 'CI/CD', 'Code Review'],
+        image: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=500&q=80'
+      },
+      { 
+        title: 'Production Portfolio & Career Kit', 
+        desc: 'An ATS-optimized developer resume, showcase GitHub profile READMEs, and technical interview demonstration kits.', 
+        tags: ['Portfolio', 'Resume', 'LinkedIn', 'Career'],
+        image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?auto=format&fit=crop&w=500&q=80'
       }
     ]
   };
@@ -200,7 +200,7 @@ const Index = () => {
     { title: 'Enroll', desc: 'Select your track and register.' },
     { title: 'Learn', desc: 'Master fundamentals through guided sessions.' },
     { title: 'Build Projects', desc: 'Create real portfolio-grade applications.' },
-    { title: 'Internship Experience', desc: 'Work under professional tech workflows.' },
+    { title: 'Project Experience', desc: 'Work under professional tech workflows.' },
     { title: 'Certification', desc: 'Get MSME-certified credentials.' },
     { title: 'Career Growth', desc: 'Apply to top tech jobs with confidence.' }
   ];
@@ -208,24 +208,24 @@ const Index = () => {
   const testimonials = [
     {
       name: 'Rohan Sharma',
-      role: 'Data Analyst at TechCorp',
-      content: 'The Advanced Technology Program helped me transition from a non-tech background. The mentor support was outstanding, and the Power BI capstone project got me my first job!',
+      role: 'Full Stack Developer at TechCorp',
+      content: 'The Full Stack Web Development program gave me the exact hands-on experience I needed. Building modern Next.js and Node.js applications with AI integration helped me land my first software engineering job!',
       rating: 5,
-      cohort: 'Data Analytics Cohort'
+      cohort: 'Full Stack Web Dev Cohort'
     },
     {
       name: 'Aditi Rao',
-      role: 'Frontend Developer at WebSolutions',
-      content: 'Building real full-stack web applications and deploying them live gave me immense confidence. The MSME certificate is a great addition to my profile.',
+      role: 'Generative AI Engineer at NeuroTech',
+      content: 'Working through Transformers, RAG architectures, and autonomous AI agents gave me immense confidence. The mentorship and real-world project reviews prepared me thoroughly for corporate technical interviews.',
       rating: 5,
-      cohort: 'Web Development Cohort'
+      cohort: 'Generative AI Cohort'
     },
     {
       name: 'Kunal Sen',
-      role: 'AI Engineer at Brainwave',
-      content: 'The Professional Internship Program was intense but rewarding. The hands-on coding and weekly feedback on my machine learning models prepared me perfectly for interviews.',
+      role: 'ML Engineer at DataSphere',
+      content: 'The Python with AI/ML flagship program was comprehensive and practical. The progression from core Python to deep learning and GenAI applications helped me build a standout portfolio.',
       rating: 5,
-      cohort: 'AI & Machine Learning Cohort'
+      cohort: 'Python with AI/ML Cohort'
     }
   ];
 
@@ -258,7 +258,7 @@ const Index = () => {
                 MSME Certified Training Institute
               </div>
               <h1 className={`text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tight leading-[1.15] ${titleClr}`}>
-                Next-Gen <span className={`${accentClr} relative inline-block`}>Tech Education</span> & Internship Portal
+                Next-Gen <span className={`${accentClr} relative inline-block`}>Tech Education</span> & Career Portal
               </h1>
               <p className={`text-xl md:text-2xl mb-4 font-bold tracking-tight ${subClr}`}>
                 Build Skills. Gain Experience. Get Industry Ready.
@@ -272,7 +272,7 @@ const Index = () => {
                     Enroll Now <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link to="/internship">
+                <Link to="/courses">
                   <Button size="lg" className={`w-full sm:w-auto h-14 px-8 text-base font-bold rounded-full transition-all duration-300 hover:scale-105 ${btnOutline}`}>
                     Explore Programs
                   </Button>
@@ -283,7 +283,7 @@ const Index = () => {
               <div className={`grid grid-cols-3 gap-4 pt-8 border-t ${isDark ? 'border-[rgba(20,184,166,0.15)]' : 'border-slate-200'}`}>
                 {[
                   { value: 500, label: 'Students Trained', suffix: '+' },
-                  { value: 3, label: 'Flagship Programs', suffix: '' },
+                  { value: 4, label: 'Flagship Programs', suffix: '' },
                   { value: 100, label: 'MSME Certified', suffix: '%' }
                 ].map((stat, idx) => (
                   <div key={idx} className={`p-4 rounded-2xl border transition-all duration-300 ${cardBg}`}>
@@ -352,7 +352,7 @@ const Index = () => {
               Trusted Excellence in Tech Education
             </h2>
             <p className={`text-base md:text-lg leading-relaxed ${mutedClr}`}>
-              EdSec Innovations is an MSME-certified training institute headquartered in Bengaluru. We bridge the gap between academic theory and real-world technology demands through project-driven internship slabs, professional developer guidance, and validated certification frameworks.
+              EdSec Innovations is an MSME-certified training institute headquartered in Bengaluru. We bridge the gap between academic theory and real-world technology demands through project-driven certified programs, professional developer guidance, and validated certification frameworks.
             </p>
           </div>
         </div>
@@ -440,10 +440,10 @@ const Index = () => {
           <div className="flex justify-center mb-12">
             <div className={`inline-flex flex-wrap gap-1.5 p-1.5 rounded-full border ${isDark ? 'bg-[#121818] border-[rgba(20,184,166,0.18)]' : 'bg-slate-100 border-slate-200'}`}>
               {[
-                { id: 'python', label: 'Python Projects' },
-                { id: 'web', label: 'Web Dev Projects' },
-                { id: 'marketing', label: 'Digital Marketing' },
-                { id: 'ar', label: 'AR Projects' }
+                { id: 'web', label: 'Full Stack Web Dev' },
+                { id: 'genai', label: 'Generative AI' },
+                { id: 'python', label: 'Python with AI/ML' },
+                { id: 'git', label: 'Git & Career' }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -506,7 +506,7 @@ const Index = () => {
               Roadmap
             </span>
             <h2 className={`text-3xl md:text-4xl font-extrabold tracking-tight ${titleClr}`}>
-              Your Learning & Internship Journey
+              Your Learning & Career Journey
             </h2>
             <p className={`text-base mt-3 max-w-2xl mx-auto ${mutedClr}`}>
               A structured, step-by-step pathway from registration to career growth.
@@ -564,7 +564,7 @@ const Index = () => {
               What Our Students Say
             </h2>
             <p className={`text-base mt-3 max-w-2xl mx-auto ${mutedClr}`}>
-              Real reviews and outcomes from graduates of our internship slabs.
+              Real reviews and outcomes from graduates of our certified programs.
             </p>
           </div>
 
@@ -650,7 +650,7 @@ const Index = () => {
               Frequently Asked Questions
             </h2>
             <p className={`text-base mt-3 ${mutedClr}`}>
-              Have questions about our programs and internships? We have answers.
+              Have questions about our certified programs and courses? We have answers.
             </p>
           </div>
 
@@ -666,15 +666,15 @@ const Index = () => {
               },
               {
                 q: "Will certificates be provided?",
-                a: "Yes, you will receive an MSME-certified internship completion certificate along with a letter of recommendation upon successful completion of the course and project requirements."
+                a: "Yes, you will receive an MSME-recognized completion certificate along with a letter of recommendation upon successful completion of the course and project requirements."
               },
               {
-                q: "Are internships available?",
-                a: "Yes, all programs include project-based internship offerings and professional exposure with real-world client workflows."
+                q: "Is hands-on project work included?",
+                a: "Yes, all programs include comprehensive, portfolio-grade project development and professional exposure with real-world workflows."
               },
               {
                 q: "What technologies are covered?",
-                a: "We cover Python, SQL, Web Development, AI, Machine Learning, Data Analytics, APIs, Git/GitHub, Digital Marketing, and AR."
+                a: "We specialize in Full Stack Web Development (React, Next.js, Node.js, MongoDB), Generative AI (LLMs, RAG, AI Agents), Python with AI/ML (NumPy, Pandas, PyTorch, Deep Learning), and Git & Career Preparation."
               },
               {
                 q: "Can students learn remotely?",

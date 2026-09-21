@@ -18,7 +18,7 @@ const Terms = () => {
                 <div>
                   <h2 className="text-2xl font-bold mb-3">1. General Terms</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    By enrolling in any course or internship program at Edsec Innovations, you agree to comply with and be bound by these terms and conditions. 
+                    By enrolling in any program at Edsec Innovations, you agree to comply with and be bound by these terms and conditions. 
                     Please read them carefully before proceeding with your enrollment.
                   </p>
                 </div>
@@ -53,7 +53,7 @@ const Terms = () => {
                 </div>
 
                 <div>
-                  <h2 className="text-2xl font-bold mb-3">4. Internship Completion & Certification</h2>
+                  <h2 className="text-2xl font-bold mb-3">4. Program Completion & Certification</h2>
                   <p className="text-muted-foreground leading-relaxed mb-2">
                     • To receive an MSME certified completion certificate, students must:
                   </p>

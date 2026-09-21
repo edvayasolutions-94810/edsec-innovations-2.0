@@ -46,7 +46,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-xs leading-relaxed mb-6 opacity-80 max-w-[260px]">
-              MSME certified training institute empowering the next generation of tech professionals through hands-on internships, real-world projects, and expert mentorship.
+              MSME certified training institute empowering the next generation of tech professionals through hands-on courses, real-world projects, and expert mentorship.
             </p>
             <div className="flex items-center gap-2.5">
               {socials.map(({ href, label, icon }) => (
@@ -67,10 +67,11 @@ const Footer = () => {
             <h3 className={`text-sm font-semibold uppercase tracking-wider mb-5 ${heading}`}>Programs</h3>
             <ul className="space-y-3 text-sm">
               {[
-                { to: '/programs/foundation-tech-program', label: 'Foundation Tech' },
-                { to: '/programs/advanced-technology-program', label: 'Advanced Tech' },
-                { to: '/programs/professional-internship-program', label: 'Professional Internship' },
-                { to: '/internship', label: 'All Programs' }
+                { to: '/programs/full-stack-web-dev', label: 'Full Stack Web Dev' },
+                { to: '/programs/generative-ai', label: 'Generative AI' },
+                { to: '/programs/python-ai-ml', label: 'Python with AI/ML' },
+                { to: '/programs/git-resume', label: 'Git & Resume' },
+                { to: '/courses', label: 'All Courses' }
               ].map(({ to, label }) => (
                 <li key={to}><Link to={to} className={`opacity-70 ${link}`}>{label}</Link></li>
               ))}
@@ -85,9 +86,8 @@ const Footer = () => {
                 { to: '/', label: 'Home' },
                 { to: '/about', label: 'About Us' },
                 { to: '/contact', label: 'Contact Us' },
-                { to: '/compare', label: 'Compare Slabs' },
-                { to: '/enroll', label: 'Enroll Now' },
-                { to: '/student/login', label: 'Student Portal' }
+                { to: '/compare', label: 'Compare Programs' },
+                { to: '/enroll', label: 'Enroll Now' }
               ].map(({ to, label }) => (
                 <li key={to}><Link to={to} className={`opacity-70 ${link}`}>{label}</Link></li>
               ))}

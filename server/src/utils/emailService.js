@@ -355,6 +355,65 @@ const sendContactUserEmail = async (contact) => {
     }
 };
 
+/**
+ * Send an OTP verification email for brochure download.
+ */
+const sendBrochureOtpEmail = async ({ email, name, otp, programTitle }) => {
+    try {
+        const transporter = getTransporter();
+        const mailOptions = {
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            to: email,
+            subject: `Your Verification Code for Brochure Download – EdSec Innovations`,
+            text: `Dear ${name},
+
+Your one-time verification code to download the brochure for ${programTitle} is:
+
+${otp}
+
+This code is valid for 5 minutes. Please do not share this code with anyone.
+
+Best Regards,
+EdSec Innovations Team`,
+            html: `
+        <div style="font-family: Arial, sans-serif; max-width: 550px; margin: auto; padding: 25px; border: 1px solid #14b8a6; border-radius: 12px; background-color: #ffffff; line-height: 1.6;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="color: #0d9488; margin: 0; font-size: 24px;">EdSec Innovations</h2>
+            <p style="color: #64748b; font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px;">Govt. MSME Recognized Training Institute</p>
+          </div>
+          
+          <p style="color: #334155; font-size: 15px;">Hello <strong>${name}</strong>,</p>
+          <p style="color: #475569; font-size: 14px;">
+            Thank you for your interest in our <strong>${programTitle}</strong> program. Please use the verification code below to complete your verification and download the detailed brochure:
+          </p>
+          
+          <div style="text-align: center; margin: 25px 0;">
+            <div style="display: inline-block; background-color: #f0fdfa; border: 2px dashed #0d9488; padding: 12px 30px; border-radius: 10px; font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #0d9488;">
+              ${otp}
+            </div>
+            <p style="color: #94a3b8; font-size: 12px; margin-top: 8px;">Valid for 5 minutes · Single-use code</p>
+          </div>
+          
+          <p style="color: #64748b; font-size: 13px;">
+            If you did not request this verification code, you can safely ignore this email.
+          </p>
+          
+          <div style="margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 12px; color: #94a3b8; text-align: center;">
+            EdSec Innovations Pvt. Ltd. · Bengaluru, India
+          </div>
+        </div>
+      `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Brochure OTP email sent: %s to %s', info.messageId, email);
+        return info;
+    } catch (error) {
+        console.error('Error sending brochure OTP email:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     sendEnrollmentEmail,
     sendAdminNotificationEmail,
@@ -363,5 +422,6 @@ module.exports = {
     sendRejectionEmail,
     sendOnHoldEmail,
     sendContactAdminEmail,
-    sendContactUserEmail
+    sendContactUserEmail,
+    sendBrochureOtpEmail
 };

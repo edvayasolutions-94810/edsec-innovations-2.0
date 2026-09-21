@@ -11,8 +11,8 @@ const faqs = [
     answer: 'You will receive an MSME (Micro, Small & Medium Enterprises) certified completion certificate recognized by industry leaders across India. This certificate adds significant value to your resume and career prospects.',
   },
   {
-    question: 'What is the difference between Internship Programs and Value Added Courses?',
-    answer: 'Internship Programs are 4-6 month comprehensive programs that include real-world projects, mentorship, and job placement support. Value Added Courses are 1-month intensive programs focused on specific skills like Python basics, SQL, or Digital Marketing.',
+    question: 'What is the structure of the Certified Programs?',
+    answer: 'Our programs are comprehensive, progressive multi-level programs that include real-world projects, live mentor guidance, and verified MSME certification, along with career acceleration tracks like Git & Resume.',
   },
   {
     question: 'Do I need prior coding experience to enroll?',
@@ -24,11 +24,11 @@ const faqs = [
   },
   {
     question: 'What kind of projects will I work on?',
-    answer: 'You will work on real-world, industry-relevant projects. For example, Data Science students build machine learning models on real datasets, Full Stack students create complete web applications, and Data Analytics students work with actual business data to create dashboards.',
+    answer: 'You will work on real-world, industry-relevant projects. For example, Generative AI students build production LLM and RAG agents, Full Stack students create complete modern web applications with Next.js and AI capabilities, and Python with AI/ML students build predictive pipelines and deep learning models.',
   },
   {
-    question: 'Is there any placement support after the internship?',
-    answer: 'Yes! Our 4-6 month internship programs include job placement support, interview preparation, and resume building. We also connect students with our industry partners for job opportunities.',
+    question: 'Is there career and placement support included?',
+    answer: 'Yes! Our programs include comprehensive job placement support, technical interview preparation, GitHub portfolio curation, and resume building. We also connect students with industry partners for job opportunities.',
   },
   {
     question: 'Can I download the course brochure before enrolling?',
