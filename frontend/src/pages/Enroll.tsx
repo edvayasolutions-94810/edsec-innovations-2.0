@@ -5,9 +5,8 @@ import Footer from '@/components/Footer';
 import FloatingContact from '@/components/FloatingContact';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GraduationCap, Clock, CheckCircle2, MessageSquare, Home } from 'lucide-react';
+import { GraduationCap, Clock, CheckCircle2, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { validateEmail, validatePhone } from '@/utils/validation';
 import { courses } from '@/data/courses';
@@ -40,18 +39,10 @@ const Enroll = () => {
     full_name: '',
     email: '',
     phone: '',
-    college_name: '',
-    degree: '',
-    branch: '',
-    year_of_study: '',
     course_name: initialCourse,
     course_duration: initialDuration,
     domainSelected: initialDomain,
     price_paid: initialPrice,
-    qualification: '',
-    city: '',
-    state: '',
-    message: '',
   });
   
   const [activeBatches, setActiveBatches] = useState<{ _id: string, courseId: string, startDate: string, endDate: string }[]>([]);
@@ -72,31 +63,24 @@ const Enroll = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      !formData.full_name || 
-      !formData.email || 
-      !formData.phone || 
-      !formData.course_name ||
-      !formData.college_name ||
-      !formData.degree ||
-      !formData.branch ||
-      !formData.year_of_study ||
-      !formData.city ||
-      !formData.state
-    ) {
-      toast.error('Please fill in all required fields');
+    if (!formData.full_name || !formData.email || !formData.phone) {
+      toast.error('Please fill in your name, mobile number, and email address.');
+      return;
+    }
+    if (!formData.course_name) {
+      toast.error('Please choose a program / domain.');
       return;
     }
     if (!formData.domainSelected) {
-      toast.error('Please select your preferred course level');
+      toast.error('Please select your preferred level.');
       return;
     }
     if (!validateEmail(formData.email)) {
-      toast.error('Please enter a valid email address');
+      toast.error('Please enter a valid email address.');
       return;
     }
     if (!validatePhone(formData.phone)) {
-      toast.error('Please enter a valid phone number');
+      toast.error('Please enter a valid phone number.');
       return;
     }
 
@@ -113,7 +97,7 @@ const Enroll = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -188,76 +172,27 @@ const Enroll = () => {
                 <h2 className={`text-2xl font-bold mb-7 ${titleClr}`}>Enrollment Form</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   
+                  <div>
+                    <label htmlFor="full_name" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Full Name *</label>
+                    <Input id="full_name" name="full_name" value={formData.full_name} onChange={handleChange} placeholder="Enter your full name" required maxLength={100} className={`h-12 ${inputCls}`} />
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="full_name" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Full Name *</label>
-                      <Input id="full_name" name="full_name" value={formData.full_name} onChange={handleChange} placeholder="Enter your full name" required maxLength={100} className={`h-12 ${inputCls}`} />
-                    </div>
                     <div>
                       <label htmlFor="phone" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Mobile Number *</label>
                       <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="+91 XXXXXXXXXX" required maxLength={20} className={`h-12 ${inputCls}`} />
                     </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="email" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Email Address *</label>
-                    <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="your.email@example.com" required maxLength={255} className={`h-12 ${inputCls}`} />
-                  </div>
-
-                  <div>
-                    <label htmlFor="college_name" className={`block text-sm font-semibold mb-2 ${labelClr}`}>College Name *</label>
-                    <Input id="college_name" name="college_name" value={formData.college_name} onChange={handleChange} placeholder="Enter your college/university name" required maxLength={200} className={`h-12 ${inputCls}`} />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="degree" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Degree *</label>
-                      <Input id="degree" name="degree" value={formData.degree} onChange={handleChange} placeholder="e.g. B.E, B.Tech, BCA, BSc" required maxLength={100} className={`h-12 ${inputCls}`} />
-                    </div>
-                    <div>
-                      <label htmlFor="branch" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Branch / Specialization *</label>
-                      <Input id="branch" name="branch" value={formData.branch} onChange={handleChange} placeholder="e.g. Computer Science, Mechanical" required maxLength={150} className={`h-12 ${inputCls}`} />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className={`block text-sm font-semibold mb-2 ${labelClr}`}>Year of Study *</label>
-                      <Select value={formData.year_of_study || undefined} onValueChange={(value) => setFormData({ ...formData, year_of_study: value })}>
-                        <SelectTrigger className={`h-12 w-full ${inputCls}`}>
-                          <SelectValue placeholder="Select your year" />
-                        </SelectTrigger>
-                        <SelectContent className={popoverBg}>
-                          {['1st Year', '2nd Year', '3rd Year', '4th Year', 'Completed / Other'].map((year) => (
-                            <SelectItem key={year} value={year} className="cursor-pointer focus:bg-[#14B8A6]/20">
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <label htmlFor="qualification" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Highest Qualification</label>
-                      <Input id="qualification" name="qualification" value={formData.qualification} onChange={handleChange} placeholder="e.g. 12th Pass, Diploma, Graduate" maxLength={100} className={`h-12 ${inputCls}`} />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="city" className={`block text-sm font-semibold mb-2 ${labelClr}`}>City *</label>
-                      <Input id="city" name="city" value={formData.city} onChange={handleChange} placeholder="Enter your city" required maxLength={100} className={`h-12 ${inputCls}`} />
-                    </div>
-                    <div>
-                      <label htmlFor="state" className={`block text-sm font-semibold mb-2 ${labelClr}`}>State *</label>
-                      <Input id="state" name="state" value={formData.state} onChange={handleChange} placeholder="Enter your state" required maxLength={100} className={`h-12 ${inputCls}`} />
+                      <label htmlFor="email" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Email Address *</label>
+                      <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="your.email@example.com" required maxLength={255} className={`h-12 ${inputCls}`} />
                     </div>
                   </div>
 
                   <div>
-                    <label className={`block text-sm font-semibold mb-2 ${labelClr}`}>Select Program *</label>
+                    <label className={`block text-sm font-semibold mb-2 ${labelClr}`}>Choose Domain / Program *</label>
                     <Select value={formData.course_name || undefined} onValueChange={handleCourseChange}>
                       <SelectTrigger className={`h-12 w-full ${inputCls}`}>
-                        <SelectValue placeholder="Choose a program" />
+                        <SelectValue placeholder="Select your domain or program" />
                       </SelectTrigger>
                       <SelectContent className={popoverBg}>
                         {courses.map((course) => (
@@ -277,10 +212,10 @@ const Enroll = () => {
 
                   {formData.course_name && (
                     <div className="animate-fade-in-up">
-                      <label className={`block text-sm font-semibold mb-2 ${labelClr}`}>Preferred Level *</label>
+                      <label className={`block text-sm font-semibold mb-2 ${labelClr}`}>Choose Level *</label>
                       <Select value={formData.domainSelected || undefined} onValueChange={(value) => setFormData({ ...formData, domainSelected: value })}>
                         <SelectTrigger className={`h-12 w-full ${inputCls}`}>
-                          <SelectValue placeholder="Choose your preferred level" />
+                          <SelectValue placeholder="Select your preferred level" />
                         </SelectTrigger>
                         <SelectContent className={popoverBg}>
                           {courses.find(c => c.title === formData.course_name)?.domains?.map((domain) => (
@@ -292,11 +227,6 @@ const Enroll = () => {
                       </Select>
                     </div>
                   )}
-
-                  <div>
-                    <label htmlFor="message" className={`block text-sm font-semibold mb-2 ${labelClr}`}>Additional Notes</label>
-                    <Textarea id="message" name="message" value={formData.message} onChange={handleChange} placeholder="Any questions or additional info..." rows={4} maxLength={2000} className={`resize-none ${inputCls}`} />
-                  </div>
 
                   <Button type="submit" disabled={isSubmitting} className={`w-full h-14 font-bold tracking-wide rounded-xl mt-6 transition-all duration-300 glow-button ${btnClass}`}>
                     {isSubmitting ? 'Submitting...' : 'Submit Enrollment Request'}
