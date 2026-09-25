@@ -12,7 +12,8 @@ import {
     Search, Download, Trash2, Eye, LayoutDashboard, Users, CreditCard, CheckCircle,
     LogOut, Edit, Plus, Mail, MessageSquare, Filter, X, ChevronRight, Clock, Award,
     BookOpen, AlertCircle, Calendar, MapPin, User, GraduationCap, DollarSign, UserCheck,
-    Settings, RefreshCw, Send, ArrowRight, Menu, FileText, Activity, Sun, Moon
+    Settings, RefreshCw, Send, ArrowRight, Menu, FileText, Activity, Sun, Moon,
+    Bell, Sparkles, Phone
 } from 'lucide-react';
 
 const getApiUrl = () => {
@@ -159,6 +160,18 @@ interface BrochureLead {
     twoFactorSessionId?: string;
 }
 
+interface DemoBookingItem {
+    _id: string;
+    name: string;
+    phone: string;
+    email: string;
+    preferredDate: string;
+    preferredTime: string;
+    programInterest?: string;
+    status: 'New' | 'Contacted' | 'Scheduled' | 'Completed';
+    createdAt: string;
+}
+
 const PROGRAM_TITLES_MAP: Record<string, string> = {
     'full-stack-web-dev': 'Full Stack Web Development',
     'generative-ai': 'Generative AI',
@@ -171,15 +184,29 @@ const AdminDashboard = () => {
     const { isDark, toggleTheme } = useTheme();
     
     // Tab Navigation State
-    const [activeTab, setActiveTab] = useState<'analytics' | 'crm' | 'batches' | 'syllabus' | 'brochures'>('crm');
+    const [activeTab, setActiveTab] = useState<'analytics' | 'crm' | 'batches' | 'syllabus' | 'brochures' | 'demos'>('crm');
 
     // Data States
     const [students, setStudents] = useState<Student[]>([]);
     const [batches, setBatches] = useState<Batch[]>([]);
     const [dbCourses, setDbCourses] = useState<CourseDb[]>([]);
     const [brochureLeads, setBrochureLeads] = useState<BrochureLead[]>([]);
+    const [demoBookings, setDemoBookings] = useState<DemoBookingItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingLeads, setLoadingLeads] = useState(false);
+    const [loadingDemos, setLoadingDemos] = useState(false);
+
+    // Notifications bell state
+    const [notificationOpen, setNotificationOpen] = useState(false);
+    const [lastReadTimestamp, setLastReadTimestamp] = useState<number>(() => {
+        const stored = localStorage.getItem('admin_last_read_notifications');
+        return stored ? parseInt(stored, 10) : 0;
+    });
+
+    // Demo Requests Filters
+    const [demoSearchQuery, setDemoSearchQuery] = useState('');
+    const [demoFilterStatus, setDemoFilterStatus] = useState('all');
+    const [demoFilterProgram, setDemoFilterProgram] = useState('all');
 
     // Brochure Leads Filters
     const [leadSearchQuery, setLeadSearchQuery] = useState('');
@@ -193,7 +220,6 @@ const AdminDashboard = () => {
     const [filterDomain, setFilterDomain] = useState('all');
     const [filterBatch, setFilterBatch] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
-    const [filterPayment, setFilterPayment] = useState('all');
     const [filterCollege, setFilterCollege] = useState('all');
     const [filterState, setFilterState] = useState('all');
 
@@ -251,6 +277,13 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchInitialData();
+        // 45-second polling interval for real-time notifications & fresh leads/demo requests
+        const interval = setInterval(() => {
+            fetchStudents(false);
+            fetchDemoBookings(false);
+            fetchBrochureLeads(false);
+        }, 45000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchInitialData = async () => {
@@ -260,13 +293,77 @@ const AdminDashboard = () => {
                 fetchStudents(),
                 fetchBatches(),
                 fetchCourses(),
-                fetchBrochureLeads()
+                fetchBrochureLeads(),
+                fetchDemoBookings()
             ]);
         } catch (err) {
             console.error(err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const fetchDemoBookings = async (showLoading = true) => {
+        if (showLoading) setLoadingDemos(true);
+        try {
+            const res = await axios.get(`${API_URL}/demo-bookings`, {
+                headers: { 
+                    Authorization: `Bearer ${getToken()}`,
+                    'x-auth-token': getToken()
+                }
+            });
+            if (res.data && res.data.bookings) {
+                setDemoBookings(res.data.bookings);
+            }
+        } catch (err: any) {
+            console.error('Failed to fetch demo bookings', err);
+        } finally {
+            if (showLoading) setLoadingDemos(false);
+        }
+    };
+
+    const handleDemoStatusChange = async (id: string, status: string) => {
+        try {
+            await axios.patch(
+                `${API_URL}/demo-bookings/${id}`,
+                { status },
+                {
+                    headers: { 
+                        Authorization: `Bearer ${getToken()}`,
+                        'x-auth-token': getToken()
+                    }
+                }
+            );
+            setDemoBookings(prev => prev.map(b => b._id === id ? { ...b, status: status as any } : b));
+            toast.success(`Demo booking marked as ${status}`);
+        } catch (err: any) {
+            console.error('Failed to update demo booking status', err);
+            toast.error(err.response?.data?.message || 'Could not update status.');
+        }
+    };
+
+    const handleDeleteDemoBooking = async (id: string, name: string) => {
+        if (!window.confirm(`Are you sure you want to delete the demo request for "${name}"?`)) return;
+        try {
+            await axios.delete(`${API_URL}/demo-bookings/${id}`, {
+                headers: { 
+                    Authorization: `Bearer ${getToken()}`,
+                    'x-auth-token': getToken()
+                }
+            });
+            setDemoBookings(prev => prev.filter(b => b._id !== id));
+            toast.success('Demo booking deleted.');
+        } catch (err: any) {
+            console.error('Failed to delete demo booking', err);
+            toast.error('Could not delete demo booking.');
+        }
+    };
+
+    const handleOpenNotifications = () => {
+        setNotificationOpen(prev => !prev);
+        const now = Date.now();
+        setLastReadTimestamp(now);
+        localStorage.setItem('admin_last_read_notifications', String(now));
     };
 
     const fetchBrochureLeads = async () => {
@@ -881,11 +978,10 @@ const AdminDashboard = () => {
         const matchBatch = filterBatch === 'all' || 
             (filterBatch === 'unassigned' ? !s.batch_id : s.batch_id === filterBatch);
         const matchStatus = filterStatus === 'all' || s.status === filterStatus;
-        const matchPayment = filterPayment === 'all' || s.payment_status === filterPayment;
         const matchCollege = filterCollege === 'all' || s.college_name === filterCollege;
         const matchState = filterState === 'all' || s.state === filterState;
 
-        return matchSearch && matchCourse && matchDomain && matchBatch && matchStatus && matchPayment && matchCollege && matchState;
+        return matchSearch && matchCourse && matchDomain && matchBatch && matchStatus && matchCollege && matchState;
     });
 
     const resetFilters = () => {
@@ -894,7 +990,6 @@ const AdminDashboard = () => {
         setFilterDomain('all');
         setFilterBatch('all');
         setFilterStatus('all');
-        setFilterPayment('all');
         setFilterCollege('all');
         setFilterState('all');
     };
@@ -915,10 +1010,98 @@ const AdminDashboard = () => {
     const statsHold = students.filter(s => s.status === 'On Hold').length;
     const statsCompleted = students.filter(s => s.status === 'Completed').length;
 
-    const totalRevenue = students.reduce((sum, s) => sum + (s.program_fee || 0), 0);
-    const totalCollected = students.reduce((sum, s) => sum + (s.amount_paid || 0), 0);
-    const totalPending = students.reduce((sum, s) => sum + (s.remaining_balance || 0), 0);
-    const collectionPercentage = totalRevenue > 0 ? Math.round((totalCollected / totalRevenue) * 100) : 0;
+    // Demo Bookings Analytics & Filtered List
+    const totalDemos = demoBookings.length;
+    const statsDemoNew = demoBookings.filter(b => b.status === 'New').length;
+    const statsDemoContacted = demoBookings.filter(b => b.status === 'Contacted').length;
+    const statsDemoScheduled = demoBookings.filter(b => b.status === 'Scheduled').length;
+    const statsDemoCompleted = demoBookings.filter(b => b.status === 'Completed').length;
+    const demoConversionRate = totalDemos > 0 ? Math.round(((statsDemoScheduled + statsDemoCompleted) / totalDemos) * 100) : 0;
+
+    const uniqueDemoProgramsList = Array.from(new Set(demoBookings.map(d => d.programInterest).filter(Boolean) as string[]));
+
+    const filteredDemoBookings = demoBookings.filter(b => {
+        const query = demoSearchQuery.toLowerCase().trim();
+        const matchesSearch = !query ||
+            (b.name && b.name.toLowerCase().includes(query)) ||
+            (b.email && b.email.toLowerCase().includes(query)) ||
+            (b.phone && b.phone.includes(query)) ||
+            (b.programInterest && b.programInterest.toLowerCase().includes(query));
+        const matchesStatus = demoFilterStatus === 'all' || b.status === demoFilterStatus;
+        const matchesProgram = demoFilterProgram === 'all' || b.programInterest === demoFilterProgram;
+        return matchesSearch && matchesStatus && matchesProgram;
+    });
+
+    const exportDemosToCSV = () => {
+        if (!demoBookings.length) {
+            toast.error('No demo requests to export.');
+            return;
+        }
+        const headers = ['Name', 'Phone', 'Email', 'Program Interest', 'Preferred Date', 'Preferred Time', 'Status', 'Requested At'];
+        const rows = demoBookings.map(d => [
+            `"${(d.name || '').replace(/"/g, '""')}"`,
+            `"${d.phone || ''}"`,
+            `"${(d.email || '').replace(/"/g, '""')}"`,
+            `"${(d.programInterest || 'General').replace(/"/g, '""')}"`,
+            `"${d.preferredDate || ''}"`,
+            `"${d.preferredTime || ''}"`,
+            `"${d.status}"`,
+            `"${new Date(d.createdAt).toLocaleString()}"`
+        ]);
+        const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', `EdSec_Demo_Requests_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Demo class requests exported to CSV!');
+    };
+
+    // Notifications List (New Registrations + New Demo Bookings)
+    const notificationsList = [
+        ...students.filter(s => s.status === 'New Application').map(s => ({
+            id: `reg-${s._id}`,
+            type: 'registration' as const,
+            title: `New registration — ${s.course_name}`,
+            subtitle: `${s.full_name} (${s.email})`,
+            time: s.enrollment_date || new Date().toISOString(),
+            timestamp: new Date(s.enrollment_date || Date.now()).getTime(),
+            targetTab: 'crm' as const,
+            item: s
+        })),
+        ...demoBookings.map(b => ({
+            id: `demo-${b._id}`,
+            type: 'demo' as const,
+            title: `Demo requested — ${b.preferredDate} (${b.preferredTime})`,
+            subtitle: `${b.name} • ${b.programInterest || 'General'}`,
+            time: b.createdAt,
+            timestamp: new Date(b.createdAt).getTime(),
+            targetTab: 'demos' as const,
+            item: b
+        }))
+    ].sort((a, b) => b.timestamp - a.timestamp);
+
+    const unreadNotificationsCount = notificationsList.filter(n => n.timestamp > lastReadTimestamp).length;
+
+    const formatRelativeTime = (timestamp: string | number | Date) => {
+        const date = new Date(timestamp);
+        const now = Date.now();
+        const diffMs = now - date.getTime();
+        if (isNaN(diffMs)) return 'Recently';
+        const diffSec = Math.floor(diffMs / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHr = Math.floor(diffMin / 60);
+        const diffDay = Math.floor(diffHr / 24);
+
+        if (diffSec < 60) return 'Just now';
+        if (diffMin < 60) return `${diffMin}m ago`;
+        if (diffHr < 24) return `${diffHr}h ago`;
+        if (diffDay === 1) return 'Yesterday';
+        if (diffDay < 7) return `${diffDay}d ago`;
+        return date.toLocaleDateString();
+    };
 
     // Brochure Leads Analytics & Filtered List
     const totalBrochureLeads = brochureLeads.length;
@@ -983,7 +1166,110 @@ const AdminDashboard = () => {
                         <span className="font-bold text-lg tracking-wider bg-gradient-to-r from-[#14B8A6] to-[#0D9488] bg-clip-text text-transparent">EDSEC CRM</span>
                         <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">Admin portal</span>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
+                        {/* Notifications Bell Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={handleOpenNotifications}
+                                className={`relative p-2 rounded-xl transition-all border ${
+                                    isDark ? 'text-[#14B8A6] border-[rgba(20,184,166,0.22)] hover:bg-[#14B8A6]/15' : 'text-[#0D9488] border-[rgba(13,148,136,0.22)] hover:bg-[#0D9488]/10'
+                                }`}
+                                title="Notifications"
+                            >
+                                <Bell className="h-4 w-4" />
+                                {unreadNotificationsCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white shadow-sm ring-2 ring-slate-900 animate-pulse">
+                                        {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                                    </span>
+                                )}
+                            </button>
+
+                            {notificationOpen && (
+                                <div className={`absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl shadow-2xl border z-50 overflow-hidden ${
+                                    isDark ? 'bg-[#0D1515] border-[rgba(20,184,166,0.25)] text-[#E6FFFA]' : 'bg-white border-slate-200 text-slate-900'
+                                }`}>
+                                    <div className="p-3.5 border-b border-[rgba(20,184,166,0.15)] flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Bell className="h-4 w-4 text-[#14B8A6]" />
+                                            <span className="font-bold text-xs uppercase tracking-wider">Admissions Activity</span>
+                                            {unreadNotificationsCount > 0 && (
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold">
+                                                    {unreadNotificationsCount} unread
+                                                </span>
+                                            )}
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                const now = Date.now();
+                                                setLastReadTimestamp(now);
+                                                localStorage.setItem('admin_last_read_notifications', String(now));
+                                            }}
+                                            className="text-[10px] text-teal-500 hover:underline font-semibold"
+                                        >
+                                            Mark read
+                                        </button>
+                                    </div>
+
+                                    <div className="max-h-80 overflow-y-auto divide-y divide-[rgba(20,184,166,0.08)]">
+                                        {notificationsList.length > 0 ? (
+                                            notificationsList.slice(0, 15).map(n => {
+                                                const isUnread = n.timestamp > lastReadTimestamp;
+                                                return (
+                                                    <div
+                                                        key={n.id}
+                                                        onClick={() => {
+                                                            setNotificationOpen(false);
+                                                            if (n.targetTab === 'crm') {
+                                                                setActiveTab('crm');
+                                                                setFilterStatus('New Application');
+                                                                if (n.item && '_id' in n.item) {
+                                                                    handleOpenProfileDrawer(n.item as Student);
+                                                                }
+                                                            } else {
+                                                                setActiveTab('demos');
+                                                            }
+                                                        }}
+                                                        className={`p-3 text-xs cursor-pointer transition-colors flex items-start gap-2.5 ${
+                                                            isUnread
+                                                                ? (isDark ? 'bg-[#14B8A6]/10 hover:bg-[#14B8A6]/15' : 'bg-teal-50/80 hover:bg-teal-100/60')
+                                                                : (isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-slate-50')
+                                                        }`}
+                                                    >
+                                                        <div className={`mt-0.5 p-1.5 rounded-lg shrink-0 ${
+                                                            n.type === 'demo' ? 'bg-amber-500/15 text-amber-400' : 'bg-[#14B8A6]/15 text-[#14B8A6]'
+                                                        }`}>
+                                                            {n.type === 'demo' ? <Sparkles className="h-3.5 w-3.5" /> : <UserCheck className="h-3.5 w-3.5" />}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center justify-between gap-1">
+                                                                <p className="font-bold text-xs truncate">{n.title}</p>
+                                                                <span className="text-[10px] text-slate-400 shrink-0">{formatRelativeTime(n.time)}</span>
+                                                            </div>
+                                                            <p className="text-[11px] text-slate-400 truncate mt-0.5">{n.subtitle}</p>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            <div className="p-6 text-center text-xs text-slate-400">
+                                                <Bell className="h-6 w-6 mx-auto mb-2 opacity-30" />
+                                                No recent admissions activity
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="p-2 border-t border-[rgba(20,184,166,0.1)] text-center bg-black/10">
+                                        <button
+                                            onClick={() => setNotificationOpen(false)}
+                                            className="text-[11px] font-semibold text-slate-400 hover:text-[#14B8A6] transition-colors"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <button
                             onClick={toggleTheme}
                             className={`p-2 rounded-xl transition-all border ${isDark ? 'text-[#14B8A6] border-[rgba(20,184,166,0.22)] hover:bg-[#14B8A6]/15' : 'text-[#0D9488] border-[rgba(13,148,136,0.22)] hover:bg-[#0D9488]/10'}`}
@@ -1079,6 +1365,24 @@ const AdminDashboard = () => {
                                 </span>
                             )}
                         </button>
+                        <button
+                            onClick={() => {
+                                setActiveTab('demos');
+                                if (!demoBookings.length) fetchDemoBookings();
+                            }}
+                            className={`px-4 py-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
+                                activeTab === 'demos'
+                                    ? 'border-[#14B8A6] text-[#14B8A6]'
+                                    : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-[#99F6E4]'
+                            }`}
+                        >
+                            <Sparkles className="h-4 w-4" /> Demo Requests
+                            {statsDemoNew > 0 && (
+                                <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-amber-500/20 text-amber-400 font-bold animate-pulse">
+                                    {statsDemoNew} new
+                                </span>
+                            )}
+                        </button>
                     </div>
 
                     {/* Loader */}
@@ -1169,28 +1473,28 @@ const AdminDashboard = () => {
                                         <Card className={`${cardBg} ${cardShadow}`}>
                                             <CardContent className="p-4 flex items-center justify-between">
                                                 <div>
-                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Gross Fees</p>
-                                                    <h4 className="text-xl font-bold mt-1 textStrong">₹{totalRevenue}</h4>
+                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Total Demo Requests</p>
+                                                    <h4 className="text-xl font-bold mt-1 text-amber-400">{totalDemos}</h4>
                                                 </div>
-                                                <DollarSign className="h-5 w-5 text-indigo-400" />
+                                                <Sparkles className="h-5 w-5 text-amber-400" />
                                             </CardContent>
                                         </Card>
                                         <Card className={`${cardBg} ${cardShadow}`}>
                                             <CardContent className="p-4 flex items-center justify-between">
                                                 <div>
-                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Revenue Collected</p>
-                                                    <h4 className="text-xl font-bold mt-1 text-emerald-500">₹{totalCollected}</h4>
+                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Demos Scheduled</p>
+                                                    <h4 className="text-xl font-bold mt-1 text-indigo-400">{statsDemoScheduled}</h4>
                                                 </div>
-                                                <CreditCard className="h-5 w-5 text-emerald-500" />
+                                                <Calendar className="h-5 w-5 text-indigo-400" />
                                             </CardContent>
                                         </Card>
                                         <Card className={`${cardBg} ${cardShadow}`}>
                                             <CardContent className="p-4 flex items-center justify-between">
                                                 <div>
-                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Balance Pending</p>
-                                                    <h4 className="text-xl font-bold mt-1 text-orange-500">₹{totalPending}</h4>
+                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Demos Completed</p>
+                                                    <h4 className="text-xl font-bold mt-1 text-emerald-400">{statsDemoCompleted}</h4>
                                                 </div>
-                                                <AlertCircle className="h-5 w-5 text-orange-500" />
+                                                <CheckCircle className="h-5 w-5 text-emerald-400" />
                                             </CardContent>
                                         </Card>
                                         <Card className={`${cardBg} ${cardShadow}`}>
@@ -1208,20 +1512,20 @@ const AdminDashboard = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <Card className={`md:col-span-2 ${cardBg} p-6 flex flex-col md:flex-row gap-6 items-center justify-between`}>
                                             <div className="space-y-4 w-full md:w-2/3">
-                                                <h3 className="text-lg font-bold textStrong">Financial Realization Summary</h3>
-                                                <p className="text-xs text-slate-400">Review real-time payment collection progress. The gauge represents realization rate over generated tuition invoices.</p>
+                                                <h3 className="text-lg font-bold textStrong">Demo Class Engagement & Funnel</h3>
+                                                <p className="text-xs text-slate-400">Review real-time conversion for prospective students who requested free demo classes. The gauge represents scheduling and completion progress.</p>
                                                 <div className="grid grid-cols-3 gap-2 pt-2 text-center">
                                                     <div className="p-2.5 rounded-lg bg-slate-900/40">
-                                                        <span className="text-[10px] text-slate-400 uppercase font-bold block">Invoiced</span>
-                                                        <span className="font-bold text-sm block mt-0.5 textStrong">₹{totalRevenue}</span>
+                                                        <span className="text-[10px] text-slate-400 uppercase font-bold block">Requested</span>
+                                                        <span className="font-bold text-sm block mt-0.5 textStrong">{totalDemos}</span>
+                                                    </div>
+                                                    <div className="p-2.5 rounded-lg bg-indigo-950/20">
+                                                        <span className="text-[10px] text-indigo-400 uppercase font-bold block">Scheduled</span>
+                                                        <span className="font-bold text-sm block mt-0.5 text-indigo-400">{statsDemoScheduled}</span>
                                                     </div>
                                                     <div className="p-2.5 rounded-lg bg-emerald-950/20">
-                                                        <span className="text-[10px] text-emerald-400 uppercase font-bold block">Collected</span>
-                                                        <span className="font-bold text-sm block mt-0.5 text-emerald-400">₹{totalCollected}</span>
-                                                    </div>
-                                                    <div className="p-2.5 rounded-lg bg-orange-950/20">
-                                                        <span className="text-[10px] text-orange-400 uppercase font-bold block">Outstanding</span>
-                                                        <span className="font-bold text-sm block mt-0.5 text-orange-400">₹{totalPending}</span>
+                                                        <span className="text-[10px] text-emerald-400 uppercase font-bold block">Completed</span>
+                                                        <span className="font-bold text-sm block mt-0.5 text-emerald-400">{statsDemoCompleted}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1243,13 +1547,13 @@ const AdminDashboard = () => {
                                                         strokeWidth="10"
                                                         fill="transparent"
                                                         strokeDasharray={2 * Math.PI * 58}
-                                                        strokeDashoffset={2 * Math.PI * 58 * (1 - collectionPercentage / 100)}
+                                                        strokeDashoffset={2 * Math.PI * 58 * (1 - (totalDemos > 0 ? (statsDemoScheduled + statsDemoCompleted) / totalDemos : 0))}
                                                         strokeLinecap="round"
                                                     />
                                                 </svg>
                                                 <div className="absolute flex flex-col items-center">
-                                                    <span className="text-2xl font-black textStrong">{collectionPercentage}%</span>
-                                                    <span className="text-[9px] uppercase tracking-widest text-slate-400">Collected</span>
+                                                    <span className="text-2xl font-black textStrong">{demoConversionRate}%</span>
+                                                    <span className="text-[9px] uppercase tracking-widest text-slate-400">Scheduled / Done</span>
                                                 </div>
                                             </div>
                                         </Card>
@@ -1353,17 +1657,7 @@ const AdminDashboard = () => {
                                                         <option value="Completed">Completed</option>
                                                     </select>
                                                 </div>
-                                                {/* Payment */}
-                                                <div>
-                                                    <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Payment</label>
-                                                    <select value={filterPayment} onChange={e => setFilterPayment(e.target.value)} className={`w-full p-2 text-xs rounded-lg ${inputBg}`}>
-                                                        <option value="all">All Payment States</option>
-                                                        <option value="Unpaid">Unpaid</option>
-                                                        <option value="Partially Paid">Partially Paid</option>
-                                                        <option value="Paid">Paid</option>
-                                                    </select>
-                                                </div>
-                                                {/* College */}
+                                                 {/* College */}
                                                 <div>
                                                     <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">College</label>
                                                     <select value={filterCollege} onChange={e => setFilterCollege(e.target.value)} className={`w-full p-2 text-xs rounded-lg ${inputBg}`}>
@@ -1391,7 +1685,6 @@ const AdminDashboard = () => {
                                                     <tr className={`border-b text-xs font-bold uppercase tracking-wider ${tableHeader}`}>
                                                         <th className="px-5 py-4">Student Profile</th>
                                                         <th className="px-5 py-4">Program & Batch</th>
-                                                        <th className="px-5 py-4">Financial Log</th>
                                                         <th className="px-5 py-4">Status Pipe</th>
                                                         <th className="px-5 py-4 text-right">CRM Actions</th>
                                                     </tr>
@@ -1413,19 +1706,6 @@ const AdminDashboard = () => {
                                                                         {student.domain && <span className="text-[10px] text-slate-400">Domain: {student.domain}</span>}
                                                                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded w-fit ${student.batch_id ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/10'}`}>
                                                                             {student.batch_selected || 'Unassigned'}
-                                                                        </span>
-                                                                    </div>
-                                                                </td>
-                                                                <td className="px-5 py-4">
-                                                                    <div className="flex flex-col gap-1">
-                                                                        <span className={`font-bold ${primaryText}`}>Paid: ₹{student.amount_paid || 0}</span>
-                                                                        <span className="text-[10px] text-slate-400">Bal: ₹{student.remaining_balance || 0} (Fee: ₹{student.program_fee || 0})</span>
-                                                                        <span className={`text-[9px] uppercase font-black px-1.5 py-0.5 rounded w-fit ${
-                                                                            student.payment_status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                                                            student.payment_status === 'Partially Paid' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
-                                                                            'bg-red-500/10 text-red-400 border border-red-500/20'
-                                                                        }`}>
-                                                                            {student.payment_status}
                                                                         </span>
                                                                     </div>
                                                                 </td>
@@ -2026,6 +2306,301 @@ const AdminDashboard = () => {
                                     </Card>
                                 </div>
                             )}
+
+                            {/* Tab: Demo Class Requests */}
+                            {activeTab === 'demos' && (
+                                <div className="space-y-6">
+                                    {/* Header & Quick Actions */}
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                        <div>
+                                            <h2 className={`text-xl font-bold flex items-center gap-2 ${titleClr}`}>
+                                                <Sparkles className="h-5 w-5 text-amber-400" /> Free Demo Class Requests
+                                            </h2>
+                                            <p className={`text-xs mt-1 ${mutedClr}`}>
+                                                Prospective students who scheduled a free live demo session through website CTAs.
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                                            <Button
+                                                onClick={() => fetchDemoBookings(true)}
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={loadingDemos}
+                                                className={`gap-1.5 ${btnSecondary}`}
+                                            >
+                                                <RefreshCw className={`h-3.5 w-3.5 ${loadingDemos ? 'animate-spin' : ''}`} /> Refresh
+                                            </Button>
+                                            <Button
+                                                onClick={exportDemosToCSV}
+                                                variant="outline"
+                                                size="sm"
+                                                className="gap-1.5 bg-[#14B8A6] hover:bg-[#0D9488] text-white border-transparent"
+                                            >
+                                                <Download className="h-3.5 w-3.5" /> Export CSV
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {/* Metrics Cards */}
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        <Card className={`${cardBg} ${cardShadow}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Total Bookings</p>
+                                                    <h4 className="text-xl font-bold mt-1 textStrong">{totalDemos}</h4>
+                                                </div>
+                                                <Sparkles className="h-5 w-5 text-amber-400" />
+                                            </CardContent>
+                                        </Card>
+                                        <Card className={`${cardBg} ${cardShadow}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">New Requests</p>
+                                                    <h4 className="text-xl font-bold mt-1 text-amber-400">{statsDemoNew}</h4>
+                                                </div>
+                                                <div className="w-2 h-2 rounded-full bg-amber-400"></div>
+                                            </CardContent>
+                                        </Card>
+                                        <Card className={`${cardBg} ${cardShadow}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Scheduled</p>
+                                                    <h4 className="text-xl font-bold mt-1 text-indigo-400">{statsDemoScheduled}</h4>
+                                                </div>
+                                                <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
+                                            </CardContent>
+                                        </Card>
+                                        <Card className={`${cardBg} ${cardShadow}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div>
+                                                    <p className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Completed</p>
+                                                    <h4 className="text-xl font-bold mt-1 text-emerald-400">{statsDemoCompleted}</h4>
+                                                </div>
+                                                <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+
+                                    {/* Search & Filters */}
+                                    <Card className={`border ${cardBg}`}>
+                                        <CardContent className="p-4 space-y-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                <div className="relative">
+                                                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                                                    <Input
+                                                        placeholder="Search by name, phone, email, program..."
+                                                        value={demoSearchQuery}
+                                                        onChange={e => setDemoSearchQuery(e.target.value)}
+                                                        className={`pl-9 h-9 text-xs rounded-xl ${inputBg}`}
+                                                    />
+                                                </div>
+                                                <Select value={demoFilterStatus} onValueChange={setDemoFilterStatus}>
+                                                    <SelectTrigger className={`h-9 text-xs rounded-xl ${inputBg}`}>
+                                                        <SelectValue placeholder="Filter by Status" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All Statuses</SelectItem>
+                                                        <SelectItem value="New">New</SelectItem>
+                                                        <SelectItem value="Contacted">Contacted</SelectItem>
+                                                        <SelectItem value="Scheduled">Scheduled</SelectItem>
+                                                        <SelectItem value="Completed">Completed</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <Select value={demoFilterProgram} onValueChange={setDemoFilterProgram}>
+                                                    <SelectTrigger className={`h-9 text-xs rounded-xl ${inputBg}`}>
+                                                        <SelectValue placeholder="Filter by Program" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">All Programs</SelectItem>
+                                                        {uniqueDemoProgramsList.map(prog => (
+                                                            <SelectItem key={prog} value={prog}>{prog}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            <div className="flex justify-between items-center pt-3 border-t border-[rgba(20,184,166,0.1)] text-xs">
+                                                <span className={mutedClr}>
+                                                    Showing <strong className={titleClr}>{filteredDemoBookings.length}</strong> of {totalDemos} total demo requests
+                                                </span>
+                                                {(demoSearchQuery || demoFilterStatus !== 'all' || demoFilterProgram !== 'all') && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setDemoSearchQuery('');
+                                                            setDemoFilterStatus('all');
+                                                            setDemoFilterProgram('all');
+                                                        }}
+                                                        className="text-teal-500 hover:underline font-semibold"
+                                                    >
+                                                        Clear all filters
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Demos Table */}
+                                    <Card className={`border ${cardBg}`}>
+                                        <CardContent className="p-0">
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full text-left border-collapse whitespace-nowrap">
+                                                    <thead>
+                                                        <tr className={`border-b text-xs uppercase font-semibold ${tableHeader}`}>
+                                                            <th className="px-6 py-4">Applicant</th>
+                                                            <th className="px-6 py-4">Contact Info</th>
+                                                            <th className="px-6 py-4">Program Interest</th>
+                                                            <th className="px-6 py-4">Preferred Slot</th>
+                                                            <th className="px-6 py-4">Status</th>
+                                                            <th className="px-6 py-4">Requested Date</th>
+                                                            <th className="px-6 py-4 text-right">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-[rgba(13,148,136,0.05)]">
+                                                        {filteredDemoBookings.map((booking) => {
+                                                            const initials = booking.name
+                                                                ? booking.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                                                                : 'DM';
+                                                            return (
+                                                                <tr key={booking._id} className={`transition-colors ${tableRowBase}`}>
+                                                                    {/* Applicant */}
+                                                                    <td className="px-6 py-4">
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 font-bold flex items-center justify-center text-xs shadow-sm">
+                                                                                {initials}
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className={`font-semibold text-sm ${primaryText}`}>{booking.name}</p>
+                                                                                <span className={`text-[11px] ${mutedClr}`}>ID: {booking._id.slice(-6)}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+
+                                                                    {/* Contact Info */}
+                                                                    <td className="px-6 py-4">
+                                                                        <div className="space-y-1">
+                                                                            <div className="flex items-center gap-1.5 text-xs">
+                                                                                <Mail className="h-3.5 w-3.5 text-slate-400" />
+                                                                                <a href={`mailto:${booking.email}`} className="hover:underline text-slate-300">
+                                                                                    {booking.email}
+                                                                                </a>
+                                                                            </div>
+                                                                            <div className="flex items-center gap-1.5 text-xs">
+                                                                                <Phone className="h-3.5 w-3.5 text-[#14B8A6]" />
+                                                                                <a href={`tel:${booking.phone}`} className="hover:underline text-slate-300">
+                                                                                    {booking.phone}
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+
+                                                                    {/* Program Interest */}
+                                                                    <td className="px-6 py-4">
+                                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#14B8A6]/10 text-[#14B8A6] border border-[#14B8A6]/20">
+                                                                            <BookOpen className="h-3 w-3" />
+                                                                            {booking.programInterest || 'General Inquiry'}
+                                                                        </span>
+                                                                    </td>
+
+                                                                    {/* Preferred Slot */}
+                                                                    <td className="px-6 py-4">
+                                                                        <div className="flex flex-col gap-0.5 text-xs">
+                                                                            <span className="font-semibold textStrong flex items-center gap-1">
+                                                                                <Calendar className="h-3.5 w-3.5 text-indigo-400" />
+                                                                                {booking.preferredDate}
+                                                                            </span>
+                                                                            <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                                                                                <Clock className="h-3 w-3 text-slate-500" />
+                                                                                {booking.preferredTime}
+                                                                            </span>
+                                                                        </div>
+                                                                    </td>
+
+                                                                    {/* Status selector */}
+                                                                    <td className="px-6 py-4">
+                                                                        <select
+                                                                            value={booking.status}
+                                                                            onChange={e => handleDemoStatusChange(booking._id, e.target.value)}
+                                                                            className={`p-1.5 rounded-lg border text-xs font-bold ${
+                                                                                booking.status === 'New' ? 'bg-amber-950/30 text-amber-400 border-amber-500/30' :
+                                                                                booking.status === 'Contacted' ? 'bg-blue-950/30 text-blue-400 border-blue-500/30' :
+                                                                                booking.status === 'Scheduled' ? 'bg-indigo-950/30 text-indigo-400 border-indigo-500/30' :
+                                                                                'bg-emerald-950/30 text-emerald-400 border-emerald-500/30'
+                                                                            }`}
+                                                                        >
+                                                                            <option value="New">New</option>
+                                                                            <option value="Contacted">Contacted</option>
+                                                                            <option value="Scheduled">Scheduled</option>
+                                                                            <option value="Completed">Completed</option>
+                                                                        </select>
+                                                                    </td>
+
+                                                                    {/* Requested Date */}
+                                                                    <td className="px-6 py-4 text-xs text-slate-400">
+                                                                        <div>{new Date(booking.createdAt).toLocaleDateString()}</div>
+                                                                        <div className="text-[10px] opacity-70">{formatRelativeTime(booking.createdAt)}</div>
+                                                                    </td>
+
+                                                                    {/* Actions */}
+                                                                    <td className="px-6 py-4 text-right">
+                                                                        <div className="flex items-center justify-end gap-1.5">
+                                                                            <a
+                                                                                href={`https://wa.me/91${booking.phone}?text=${encodeURIComponent(`Hi ${booking.name}, thank you for booking a free demo class for ${booking.programInterest || 'EdSec Innovations Programs'} scheduled for ${booking.preferredDate} at ${booking.preferredTime}. We look forward to connecting with you!`)}`}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                title="Send WhatsApp Message"
+                                                                                className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                                                                            >
+                                                                                <MessageSquare className="h-4 w-4" />
+                                                                            </a>
+                                                                            <a
+                                                                                href={`tel:${booking.phone}`}
+                                                                                title="Call Phone Number"
+                                                                                className="p-1.5 rounded-lg bg-teal-500/10 text-teal-400 hover:bg-teal-500/20 transition-colors"
+                                                                            >
+                                                                                <Phone className="h-4 w-4" />
+                                                                            </a>
+                                                                            <a
+                                                                                href={`mailto:${booking.email}?subject=${encodeURIComponent(`Confirmation: Your Free Demo Class at EdSec Innovations`)}`}
+                                                                                title="Send Email"
+                                                                                className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors"
+                                                                            >
+                                                                                <Mail className="h-4 w-4" />
+                                                                            </a>
+                                                                            <button
+                                                                                onClick={() => handleDeleteDemoBooking(booking._id, booking.name)}
+                                                                                title="Delete Demo Booking"
+                                                                                className="p-1.5 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 transition-colors"
+                                                                            >
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            </button>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            );
+                                                        })}
+                                                        {filteredDemoBookings.length === 0 && (
+                                                            <tr>
+                                                                <td colSpan={7} className={`px-6 py-12 text-center text-sm ${mutedClr}`}>
+                                                                    {loadingDemos ? (
+                                                                        <div className="flex items-center justify-center gap-2">
+                                                                            <RefreshCw className="h-4 w-4 animate-spin text-[#14B8A6]" />
+                                                                            Loading demo class requests...
+                                                                        </div>
+                                                                    ) : totalDemos === 0 ? (
+                                                                        'No free demo class requests received yet.'
+                                                                    ) : (
+                                                                        'No demo requests match your current search/filter criteria.'
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
@@ -2081,27 +2656,14 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
 
-                            {/* Program & Financials */}
+                            {/* Program & Enrollment Details */}
                             <div className="space-y-3">
-                                <h4 className="text-sm font-bold text-[#14B8A6] flex items-center gap-1.5"><DollarSign className="h-4 w-4" /> Program & Financials</h4>
+                                <h4 className="text-sm font-bold text-[#14B8A6] flex items-center gap-1.5"><BookOpen className="h-4 w-4" /> Program & Enrollment Details</h4>
                                 <div className="grid grid-cols-2 gap-4 bg-slate-950/20 p-4 rounded-xl border border-slate-800/40">
                                     <div><span className="text-slate-500 block">Selected Course</span><strong className="text-sm text-blue-500">{selectedStudent.course_name}</strong></div>
                                     <div><span className="text-slate-500 block">Domain Selected</span><strong className="text-sm text-indigo-400">{selectedStudent.domain || 'N/A'}</strong></div>
                                     <div><span className="text-slate-500 block">Assigned Batch</span><strong className="text-sm">{selectedStudent.batch_selected || 'Unassigned'}</strong></div>
                                     <div><span className="text-slate-500 block">Enrollment Date</span><strong className="text-sm">{selectedStudent.enrollment_date ? new Date(selectedStudent.enrollment_date).toLocaleString() : 'N/A'}</strong></div>
-                                    <div><span className="text-slate-500 block">Program Fee Invoice</span><strong className="text-sm">₹{selectedStudent.program_fee || 0}</strong></div>
-                                    <div><span className="text-slate-500 block">Total Amount Paid</span><strong className="text-sm text-emerald-400">₹{selectedStudent.amount_paid || 0}</strong></div>
-                                    <div><span className="text-slate-500 block">Remaining Balance</span><strong className="text-sm text-orange-400">₹{selectedStudent.remaining_balance || 0}</strong></div>
-                                    <div>
-                                        <span className="text-slate-500 block mb-1">Payment Status</span>
-                                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
-                                            selectedStudent.payment_status === 'Paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                            selectedStudent.payment_status === 'Partially Paid' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
-                                            'bg-red-500/10 text-red-400 border border-red-500/20'
-                                        }`}>
-                                            {selectedStudent.payment_status}
-                                        </span>
-                                    </div>
                                     {selectedStudent.message && (
                                         <div className="col-span-2 border-t border-slate-800/40 pt-2">
                                             <span className="text-slate-500 block">Student Message</span>
@@ -2383,9 +2945,9 @@ const AdminDashboard = () => {
                                     </div>
                                 </div>
 
-                                {/* Financials & Program Group */}
+                                {/* Course Registration Group */}
                                 <div className="space-y-3">
-                                    <h4 className="font-bold text-[#14B8A6] border-b border-slate-800 pb-1">3. Course Registration & Payments</h4>
+                                    <h4 className="font-bold text-[#14B8A6] border-b border-slate-800 pb-1">3. Course Registration</h4>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div>
                                             <label className="text-slate-400 block mb-1">Selected Program Course</label>
@@ -2398,14 +2960,6 @@ const AdminDashboard = () => {
                                         <div>
                                             <label className="text-slate-400 block mb-1">Course Duration (e.g. 3 Months)</label>
                                             <Input value={editForm.course_duration || ''} onChange={e => setEditForm({ ...editForm, course_duration: e.target.value })} className={inputBg} />
-                                        </div>
-                                        <div>
-                                            <label className="text-slate-400 block mb-1">Total Program Fee (₹)</label>
-                                            <Input type="number" value={editForm.program_fee || 0} onChange={e => setEditForm({ ...editForm, program_fee: parseInt(e.target.value) || 0 })} className={inputBg} />
-                                        </div>
-                                        <div>
-                                            <label className="text-slate-400 block mb-1">Tuition Amount Paid (₹)</label>
-                                            <Input type="number" value={editForm.amount_paid || 0} onChange={e => setEditForm({ ...editForm, amount_paid: parseInt(e.target.value) || 0 })} className={inputBg} />
                                         </div>
                                     </div>
                                 </div>

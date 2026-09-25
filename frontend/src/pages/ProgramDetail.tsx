@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { Button } from '@/components/ui/button';
 import BrochureGate from '@/components/BrochureGate';
+import { BookDemoModal } from '@/components/BookDemoModal';
 import { courses } from '@/data/courses';
 import { domainData, DomainData } from '@/data/domainData';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -134,12 +135,23 @@ const ProgramDetail = () => {
           <p className={`text-lg md:text-xl max-w-3xl mb-10 leading-relaxed ${mutedClr}`}>
             {course.detailedDescription || course.description}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 relative">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 relative">
             <Link to="/enroll" state={{ predefinedCourse: course.title }} className="w-full sm:w-auto">
               <Button size="lg" className={`w-full sm:w-auto h-14 px-8 text-base font-bold tracking-wide rounded-xl border-0 transition-all duration-300 hover:scale-105 glow-button ${btnPrimary}`}>
                 Enroll Now · ₹{course.price}
               </Button>
             </Link>
+            <BookDemoModal
+              programInterest={course.title}
+              triggerVariant="outline"
+              triggerSize="lg"
+              triggerClassName={`w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-xl border flex items-center justify-center gap-2 transition-all duration-300 ${
+                isDark
+                  ? 'border-[#14B8A6]/40 text-[#2DD4BF] hover:bg-[#14B8A6]/10 hover:border-[#14B8A6]'
+                  : 'border-[#0D9488]/40 text-[#0D9488] hover:bg-[#0D9488]/10 hover:border-[#0D9488]'
+              }`}
+              triggerText="✨ Book a Free Demo Class"
+            />
             <BrochureGate
               programId={course.brochureProgramId || course.id}
               programTitle={course.title}

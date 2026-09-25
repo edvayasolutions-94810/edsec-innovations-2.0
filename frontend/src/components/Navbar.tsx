@@ -6,6 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
 import logo from '@/assets/edsec-logo-new.png';
 
+import { BookDemoModal } from '@/components/BookDemoModal';
+import { Sparkles } from 'lucide-react';
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -39,6 +42,10 @@ const Navbar = () => {
     ? 'bg-[#14B8A6] text-white hover:bg-[#0D9488] shadow-[0_0_16px_rgba(20,184,166,0.5)] border-0'
     : 'bg-[#0D9488] text-white hover:bg-[#0F766E] shadow-[0_0_14px_rgba(13,148,136,0.35)] border-0';
 
+  const demoCls = isDark
+    ? 'border-[#14B8A6]/40 text-[#2DD4BF] hover:bg-[#14B8A6]/15 hover:border-[#14B8A6]'
+    : 'border-[#0D9488]/40 text-[#0D9488] hover:bg-[#0D9488]/10 hover:border-[#0D9488]';
+
   const toggleCls = isDark
     ? 'text-[#14B8A6] border border-[rgba(20,184,166,0.25)] hover:bg-[#14B8A6]/15 rounded-full'
     : 'text-[#0D9488] border border-[rgba(13,148,136,0.25)] hover:bg-[#0D9488]/10 rounded-full';
@@ -70,6 +77,12 @@ const Navbar = () => {
                 </Button>
               </Link>
             ))}
+            <BookDemoModal
+              triggerVariant="outline"
+              triggerSize="sm"
+              triggerClassName={`h-9 px-3.5 text-xs font-bold rounded-full transition-all duration-300 hover:scale-105 ml-1 flex items-center gap-1.5 ${demoCls}`}
+              triggerText="✨ Free Demo"
+            />
             <Link to="/enroll" className="ml-1">
               <Button size="sm" className={`h-9 px-5 text-sm font-bold rounded-full transition-all duration-300 hover:scale-105 glow-button ${enrollCls}`}>
                 {t('cta.enroll')}
@@ -103,6 +116,13 @@ const Navbar = () => {
                 </Button>
               </Link>
             ))}
+            <div className="pt-1">
+              <BookDemoModal
+                triggerVariant="outline"
+                triggerClassName={`w-full h-11 text-sm font-bold rounded-2xl flex items-center justify-center gap-2 ${demoCls}`}
+                triggerText="✨ Book a Free Demo Class"
+              />
+            </div>
           </div>
         )}
       </div>

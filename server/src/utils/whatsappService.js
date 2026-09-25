@@ -431,10 +431,175 @@ EdSec Innovations`;
     }
 };
 
+/**
+ * Send an automated WhatsApp notification to admin when a new Free Demo Class is requested.
+ */
+const sendDemoBookingWhatsAppNotification = async (booking) => {
+    const adminPhone = process.env.ADMIN_WHATSAPP || '918660132700';
+    const dateStr = booking.createdAt 
+        ? new Date(booking.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+        : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+    const messageBody = `📅 New Demo Class Request – EdSec Innovations
+
+👤 Name: ${booking.name}
+📱 Phone: ${booking.phone}
+📧 Email: ${booking.email}
+🗓️ Preferred Date: ${booking.preferredDate}
+⏰ Preferred Time: ${booking.preferredTime}
+🎯 Interested In: ${booking.programInterest || 'Not specified'}
+
+⏰ Submitted On:
+${dateStr}`;
+
+    // 1. Check for Twilio WhatsApp configuration
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+        try {
+            const sid = process.env.TWILIO_ACCOUNT_SID;
+            const token = process.env.TWILIO_AUTH_TOKEN;
+            const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
+            const to = adminPhone.startsWith('whatsapp:') ? adminPhone : `whatsapp:+${adminPhone.replace('+', '')}`;
+            
+            const authHeader = 'Basic ' + Buffer.from(`${sid}:${token}`).toString('base64');
+            const data = new URLSearchParams({ To: to, From: from, Body: messageBody });
+
+            await axios.post(
+                `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
+                data.toString(),
+                {
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+            );
+            console.log('Demo booking WhatsApp notification sent successfully via Twilio.');
+            return;
+        } catch (error) {
+            console.error('WhatsApp Error (Twilio Demo Booking):', error.response?.data || error.message);
+            throw new Error(`Twilio WhatsApp failed: ${error.message}`);
+        }
+    }
+
+    // 2. Check for Meta WhatsApp Cloud API configuration
+    if (process.env.META_WA_ACCESS_TOKEN && process.env.META_WA_PHONE_NUMBER_ID) {
+        try {
+            const token = process.env.META_WA_ACCESS_TOKEN;
+            const phoneId = process.env.META_WA_PHONE_NUMBER_ID;
+            const to = adminPhone.replace(/[^0-9]/g, '');
+
+            await axios.post(
+                `https://graph.facebook.com/v19.0/${phoneId}/messages`,
+                {
+                    messaging_product: 'whatsapp',
+                    to: to,
+                    type: 'text',
+                    text: { body: messageBody }
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            console.log('Demo booking WhatsApp notification sent successfully via Meta Cloud API.');
+            return;
+        } catch (error) {
+            console.error('WhatsApp Error (Meta Cloud Demo Booking):', error.response?.data || error.message);
+            throw new Error(`Meta WhatsApp failed: ${error.message}`);
+        }
+    }
+
+    console.warn('WhatsApp credentials not configured. Skipping demo booking WhatsApp notification.');
+};
+
+/**
+ * Send a confirmation WhatsApp message to the student who requested a Free Demo Class.
+ */
+const sendDemoBookingUserWhatsAppConfirmation = async (booking) => {
+    const studentPhone = booking.phone;
+    if (!studentPhone) {
+        console.warn('No student phone number available. Skipping demo booking user confirmation.');
+        return;
+    }
+
+    const messageBody = `Hello ${booking.name},
+
+Thank you for booking a Free Demo Class with EdSec Innovations! We have received your request for:
+🗓️ Date: ${booking.preferredDate}
+⏰ Time: ${booking.preferredTime}
+🎯 Topic: ${booking.programInterest || 'General Demo'}
+
+Our academic counseling team will reach out to you shortly to confirm your meeting link and slot.
+
+Best regards,
+EdSec Innovations`;
+
+    // 1. Check for Twilio WhatsApp configuration
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN) {
+        try {
+            const sid = process.env.TWILIO_ACCOUNT_SID;
+            const token = process.env.TWILIO_AUTH_TOKEN;
+            const from = process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886';
+            const to = studentPhone.startsWith('whatsapp:') ? studentPhone : `whatsapp:+${studentPhone.replace(/[^0-9]/g, '')}`;
+            
+            const authHeader = 'Basic ' + Buffer.from(`${sid}:${token}`).toString('base64');
+            const data = new URLSearchParams({ To: to, From: from, Body: messageBody });
+
+            await axios.post(
+                `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
+                data.toString(),
+                {
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                }
+            );
+            console.log(`Demo booking user confirmation WhatsApp sent via Twilio to ${to}`);
+            return;
+        } catch (error) {
+            console.error('WhatsApp Error (Twilio Demo User):', error.response?.data || error.message);
+        }
+    }
+
+    // 2. Check for Meta WhatsApp Cloud API configuration
+    if (process.env.META_WA_ACCESS_TOKEN && process.env.META_WA_PHONE_NUMBER_ID) {
+        try {
+            const token = process.env.META_WA_ACCESS_TOKEN;
+            const phoneId = process.env.META_WA_PHONE_NUMBER_ID;
+            const to = studentPhone.replace(/[^0-9]/g, '');
+
+            await axios.post(
+                `https://graph.facebook.com/v19.0/${phoneId}/messages`,
+                {
+                    messaging_product: 'whatsapp',
+                    to: to,
+                    type: 'text',
+                    text: { body: messageBody }
+                },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+            console.log(`Demo booking user confirmation WhatsApp sent via Meta to ${to}`);
+            return;
+        } catch (error) {
+            console.error('WhatsApp Error (Meta Cloud Demo User):', error.response?.data || error.message);
+        }
+    }
+};
+
 module.exports = {
     sendWhatsAppNotification,
     sendStudentWhatsAppStatus,
     sendContactWhatsAppNotification,
     sendContactUserWhatsAppConfirmation,
-    sendStudentEnrollmentWhatsAppConfirmation
+    sendStudentEnrollmentWhatsAppConfirmation,
+    sendDemoBookingWhatsAppNotification,
+    sendDemoBookingUserWhatsAppConfirmation
 };

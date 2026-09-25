@@ -108,6 +108,7 @@ app.use('/api/syllabus', require('./src/routes/syllabusRoutes'));
 app.use('/api/contact', submissionRateLimiter, require('./src/routes/contactRoutes'));
 app.use('/api/batches', require('./src/routes/batchRoutes'));
 app.use('/api/brochures', submissionRateLimiter, require('./src/routes/brochureRoutes'));
+app.use('/api/demo-bookings', submissionRateLimiter, require('./src/routes/demoBookingRoutes'));
 
 // Central 404 handler
 app.use((req, res) => {

@@ -14,6 +14,7 @@ import PromoBanner from '@/components/PromoBanner';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import logo from '@/assets/edsec-logo-new.png';
+import { BookDemoModal } from '@/components/BookDemoModal';
 import {
   Accordion,
   AccordionContent,
@@ -266,14 +267,20 @@ const Index = () => {
               <p className={`text-base md:text-lg mb-10 max-w-2xl leading-relaxed ${mutedClr}`}>
                 Join India's leading MSME-certified learning hub. Elevate your potential with hands-on labs, elite mentorship, and portfolio-grade industry development designed for modern developers.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 mb-14">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-14">
                 <Link to="/enroll">
                   <Button size="lg" className={`w-full sm:w-auto h-14 px-9 text-base font-bold tracking-wide rounded-full border-0 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 glow-button ${btnPrimary}`}>
                     Enroll Now <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
+                <BookDemoModal
+                  triggerVariant="outline"
+                  triggerSize="lg"
+                  triggerClassName={`w-full sm:w-auto h-14 px-8 text-base font-bold rounded-full transition-all duration-300 hover:scale-105 ${btnOutline} border-2 flex items-center justify-center gap-2`}
+                  triggerText="✨ Book Free Demo"
+                />
                 <Link to="/courses">
-                  <Button size="lg" className={`w-full sm:w-auto h-14 px-8 text-base font-bold rounded-full transition-all duration-300 hover:scale-105 ${btnOutline}`}>
+                  <Button size="lg" variant="ghost" className={`w-full sm:w-auto h-14 px-6 text-base font-semibold rounded-full transition-all duration-300 hover:scale-105 ${subClr}`}>
                     Explore Programs
                   </Button>
                 </Link>
