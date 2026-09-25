@@ -2,17 +2,31 @@ const nodemailer = require('nodemailer');
 
 // Setup transporter
 const getTransporter = () => {
-    const host = process.env.SMTP_HOST || 'smtp.ethereal.email';
+    const host = process.env.SMTP_HOST || '';
+    const user = process.env.SMTP_USER || '';
+    const pass = process.env.SMTP_PASS || '';
+
+    // If using Gmail, use nodemailer's built-in gmail service configuration
+    if (host.includes('gmail') || user.endsWith('@gmail.com') || process.env.SMTP_SERVICE === 'gmail') {
+        return nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: user || 'edsecinnovations@gmail.com',
+                pass: pass
+            }
+        });
+    }
+
     const port = parseInt(process.env.SMTP_PORT || '587');
     const secure = port === 465;
 
     return nodemailer.createTransport({
-        host,
+        host: host || 'smtp.ethereal.email',
         port,
         secure,
         auth: {
-            user: process.env.SMTP_USER || 'dummy_user',
-            pass: process.env.SMTP_PASS || 'dummy_pass'
+            user: user || 'dummy_user',
+            pass: pass || 'dummy_pass'
         }
     });
 };
@@ -124,30 +138,42 @@ const sendStudentConfirmationEmail = async (student) => {
         const mailOptions = {
             from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
             to: student.email,
-            subject: `Enrollment Received – EdSec Innovations`,
+            subject: `🎉 Congratulations! Your Enrollment Application is Received – EdSec Innovations`,
             text: `Dear ${student.full_name},
 
-Thank you for enrolling with EdSec Innovations.
+Congratulations on taking the first step towards advancing your career with EdSec Innovations!
 
-We have successfully received your enrollment request and our team will review your application shortly.
+We have successfully received your enrollment registration for the ${student.course_name} program.
 
-Our representatives will contact you regarding the next steps.
+Our admissions team will review your application details and contact you with cohort onboarding instructions shortly.
 
 Thank you for choosing EdSec Innovations.
 
 Best Regards,
-EdSec Innovations Team`,
+Admissions Team
+EdSec Innovations`,
             html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; line-height: 1.6;">
-          <h2 style="color: #0d9488; margin-top: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">Enrollment Received</h2>
+          <h2 style="color: #0d9488; margin-top: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">🎉 Congratulations! Enrollment Application Received</h2>
           <p>Dear <strong>${student.full_name}</strong>,</p>
-          <p>Thank you for enrolling with <strong>EdSec Innovations</strong>.</p>
-          <p>We have successfully received your enrollment request and our team will review your application shortly.</p>
-          <p>Our representatives will contact you regarding the next steps.</p>
-          <p>Thank you for choosing EdSec Innovations.</p>
+          <p>Congratulations on taking the first step towards advancing your career with <strong>EdSec Innovations</strong>!</p>
+          <p>We have successfully received your enrollment registration for the <strong>${student.course_name}</strong> program.</p>
+          <p>Our admissions committee will review your application details and contact you with cohort onboarding schedule and orientation instructions shortly.</p>
+          
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 20px 0; font-size: 13px;">
+            <p style="margin: 0 0 6px 0; font-weight: bold; color: #0d9488;">Registration Summary:</p>
+            <ul style="margin: 0; padding-left: 20px; color: #475569;">
+              <li><strong>Selected Program:</strong> ${student.course_name}</li>
+              ${student.domain ? `<li><strong>Domain:</strong> ${student.domain}</li>` : ''}
+              <li><strong>Applicant Email:</strong> ${student.email}</li>
+              <li><strong>Contact Number:</strong> ${student.phone}</li>
+            </ul>
+          </div>
+          
+          <p>If you have any immediate questions, feel free to reply directly to this email or chat with our team on WhatsApp at <strong>+91 86601 32700</strong>.</p>
           <br>
-          <p style="margin-bottom: 0;">Best Regards,</p>
-          <p style="margin-top: 4px; font-weight: bold; color: #0d9488;">EdSec Innovations Team</p>
+          <p style="margin-bottom: 0;">Warm regards,</p>
+          <p style="margin-top: 4px; font-weight: bold; color: #0d9488;">Admissions Department<br>EdSec Innovations Pvt. Ltd.</p>
         </div>
       `
         };
@@ -414,6 +440,134 @@ EdSec Innovations Team`,
     }
 };
 
+/**
+ * Send an email notification to Admin when a new free demo class is booked.
+ */
+const sendDemoBookingAdminEmail = async (booking) => {
+    try {
+        const transporter = getTransporter();
+        const adminEmail = process.env.ADMIN_EMAIL || 'edsecinnovations@gmail.com';
+        const dateStr = booking.createdAt 
+            ? new Date(booking.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+            : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+        const mailOptions = {
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            to: adminEmail,
+            subject: `✨ New Demo Class Request – ${booking.name} (${booking.preferredDate})`,
+            html: `
+        <div style="font-family: Arial, sans-serif; max-width: 650px; margin: auto; padding: 25px; border: 1px solid #14b8a6; border-radius: 12px; background-color: #fafafa; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+          <h2 style="color: #0d9488; border-bottom: 2px solid #14b8a6; padding-bottom: 10px; margin-top: 0;">✨ New Demo Class Request</h2>
+          <p style="color: #475569; font-size: 14px;">A prospective student has scheduled a free live demo class. Details are below:</p>
+          
+          <table border="1" cellpadding="10" style="border-collapse: collapse; width: 100%; border-color: #e2e8f0; font-size: 14px;">
+            <tr style="background-color: #f1f5f9; color: #1e293b;">
+              <th align="left" style="width: 35%;">Field</th>
+              <th align="left">Details</th>
+            </tr>
+            <tr>
+              <td><strong>Student Name</strong></td>
+              <td>${booking.name}</td>
+            </tr>
+            <tr>
+              <td><strong>Mobile Number</strong></td>
+              <td><a href="tel:${booking.phone}" style="color: #0d9488; font-weight: bold;">${booking.phone}</a></td>
+            </tr>
+            <tr>
+              <td><strong>Email Address</strong></td>
+              <td><a href="mailto:${booking.email}" style="color: #0d9488;">${booking.email}</a></td>
+            </tr>
+            <tr>
+              <td><strong>Program Interest</strong></td>
+              <td><span style="font-weight: bold; color: #0f766e;">${booking.programInterest || 'General Inquiry'}</span></td>
+            </tr>
+            <tr>
+              <td><strong>Preferred Date</strong></td>
+              <td><strong>${booking.preferredDate}</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Preferred Time Slot</strong></td>
+              <td><strong>${booking.preferredTime}</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Submitted At</strong></td>
+              <td>${dateStr}</td>
+            </tr>
+          </table>
+          
+          <div style="margin-top: 25px; text-align: center;">
+            <a href="https://wa.me/91${booking.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${booking.name}, thank you for booking a demo class with EdSec Innovations for ${booking.programInterest || 'our programs'}. We are excited to connect with you!`)}" style="display: inline-block; padding: 10px 20px; background-color: #14b8a6; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px;">
+              Contact on WhatsApp
+            </a>
+          </div>
+          
+          <div style="margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 12px; color: #64748b; text-align: center;">
+            This is an automated demo class alert from the EdSec Innovations Portal.
+          </div>
+        </div>
+      `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Demo booking admin email sent: %s', info.messageId);
+        return info;
+    } catch (error) {
+        console.error('Error sending demo booking admin email:', error);
+        throw error;
+    }
+};
+
+/**
+ * Send a confirmation email to the Student when their demo class booking is submitted.
+ */
+const sendDemoBookingStudentEmail = async (booking) => {
+    try {
+        const transporter = getTransporter();
+        const mailOptions = {
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            to: booking.email,
+            subject: `🎉 Free Demo Class Scheduled – EdSec Innovations`,
+            html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; line-height: 1.6;">
+          <h2 style="color: #0d9488; margin-top: 0; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">🎉 Free Demo Class Booking Confirmed!</h2>
+          <p>Dear <strong>${booking.name}</strong>,</p>
+          <p>Congratulations on taking the initiative to elevate your tech skills! We are excited to welcome you to a free live demo session with <strong>EdSec Innovations</strong>.</p>
+          
+          <div style="background-color: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 8px; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0 0 8px 0; color: #0f766e; font-weight: bold; font-size: 14px;">Your Demo Session Details:</p>
+            <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 13px;">
+              <li><strong>Program:</strong> ${booking.programInterest || 'Technology Career Program'}</li>
+              <li><strong>Scheduled Date:</strong> ${booking.preferredDate}</li>
+              <li><strong>Time Slot:</strong> ${booking.preferredTime}</li>
+              <li><strong>Format:</strong> Online Live Interactive Session</li>
+            </ul>
+          </div>
+          
+          <p>Our academic mentor will connect with you prior to the session via WhatsApp / Phone call at <strong>${booking.phone}</strong> with the meeting link.</p>
+          <p>In this live demo session, you will get:</p>
+          <ul>
+            <li>Live curriculum walkthrough & hands-on preview</li>
+            <li>Direct Q&A with industry experienced mentors</li>
+            <li>Placement assistance guidance & career roadmap</li>
+          </ul>
+          
+          <p>If you have any questions or wish to reschedule, feel free to reply to this email or reach us on WhatsApp at <strong>+91 86601 32700</strong>.</p>
+          <br>
+          <p style="margin-bottom: 0;">Warm regards,</p>
+          <p style="margin-top: 4px; font-weight: bold; color: #0d9488;">Admissions & Academic Team<br>EdSec Innovations Pvt. Ltd.</p>
+        </div>
+      `
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Demo booking student confirmation email sent: %s', info.messageId);
+        return info;
+    } catch (error) {
+        console.error('Error sending demo booking student email:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     sendEnrollmentEmail,
     sendAdminNotificationEmail,
@@ -423,5 +577,7 @@ module.exports = {
     sendOnHoldEmail,
     sendContactAdminEmail,
     sendContactUserEmail,
-    sendBrochureOtpEmail
+    sendBrochureOtpEmail,
+    sendDemoBookingAdminEmail,
+    sendDemoBookingStudentEmail
 };

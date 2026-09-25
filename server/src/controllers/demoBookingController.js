@@ -3,6 +3,10 @@ const {
     sendDemoBookingWhatsAppNotification, 
     sendDemoBookingUserWhatsAppConfirmation 
 } = require('../utils/whatsappService');
+const {
+    sendDemoBookingAdminEmail,
+    sendDemoBookingStudentEmail
+} = require('../utils/emailService');
 
 // @route   POST /api/demo-bookings
 // @desc    Submit a new free demo class booking request
@@ -41,6 +45,20 @@ const submitDemoBooking = async (req, res) => {
             await sendDemoBookingUserWhatsAppConfirmation(booking);
         } catch (waErr) {
             console.error('Demo Booking User WhatsApp Error:', waErr.message);
+        }
+
+        // 3. Send Admin Email Notification (non-blocking)
+        try {
+            await sendDemoBookingAdminEmail(booking);
+        } catch (mailErr) {
+            console.error('Demo Booking Admin Email Error:', mailErr.message);
+        }
+
+        // 4. Send Student Email Confirmation (non-blocking)
+        try {
+            await sendDemoBookingStudentEmail(booking);
+        } catch (mailErr) {
+            console.error('Demo Booking Student Email Error:', mailErr.message);
         }
 
         res.status(201).json({
