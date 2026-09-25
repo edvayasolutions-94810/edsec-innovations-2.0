@@ -402,69 +402,69 @@ export const domainData: DomainData[] = [
     ]
   },
 
-  // ── PROGRAM 3: PYTHON WITH AI/ML (FLAGSHIP, 6 MONTHS) ────────────────────
+  // ── PROGRAM 3: PYTHON WITH AI/ML (FLAGSHIP, 180 DAYS) ────────────────────
   {
     id: 'python-ai-level-1',
-    name: 'Level 1 — Basic (Months 1–2)',
+    name: 'Level 1 — Basic (45 Days)',
     programId: 'python-ai-ml',
     programTitle: 'Python with AI/ML',
     level: 'Beginner',
-    duration: '2 Months',
+    duration: '45 Days',
     price: '1999',
     tagline: 'Build Your Foundation with Python and Data Analysis',
-    description: 'Month 1 covers Python from zero, core programming, data types, control flow, functions, modules, and file handling; Month 2 covers OOP concepts, NumPy, Pandas, and Matplotlib data visualization with real projects.',
+    description: 'Covers Python from zero, core programming, data types, control flow, functions, modules, file handling, OOP concepts, NumPy, Pandas, and Matplotlib data visualization with real projects.',
     features: [
-      'Month 1: Python from Zero to Functions & Modules',
-      'Month 2: OOP Concepts & Advanced Python',
+      'Python from Zero to Functions & Modules',
+      'OOP Concepts & Advanced Python',
       'NumPy Array Computing',
       'Pandas Data Wrangling',
       'Matplotlib Visualization & Real Projects'
     ],
     syllabus: [
       {
-        title: 'Month 1: Python Fundamentals',
+        title: 'Phase 1: Python Fundamentals',
         topics: [
           'Python from zero & development environment setup (VS Code, Jupyter)',
           'Data types, variables, type casting and basic operators',
           'Control flow: if/else logic, while and for loops',
           'Functions, parameter passing, return values and lambda functions',
           'Modules, packages and file handling (reading/writing CSV, JSON)',
-          'Month 1 Mini Projects'
+          'Hands-on Mini Projects'
         ]
       },
       {
-        title: 'Month 2: Advanced Python + Data',
+        title: 'Phase 2: Advanced Python + Data',
         topics: [
           'Object-Oriented Programming (OOP): classes, objects, inheritance',
           'Encapsulation, polymorphism and special magic methods',
           'NumPy for high-performance numerical and matrix operations',
           'Pandas DataFrames: indexing, filtering, merging and grouping',
           'Data visualization with Matplotlib and Seaborn',
-          'Month 2 Real-World Data Projects'
+          'Real-World Data Projects'
         ]
       }
     ]
   },
   {
     id: 'python-ai-level-2',
-    name: 'Level 2 — Intermediate (Months 3–4)',
+    name: 'Level 2 — Intermediate (90 Days)',
     programId: 'python-ai-ml',
     programTitle: 'Python with AI/ML',
     level: 'Intermediate',
-    duration: '2 Months',
+    duration: '90 Days',
     price: '3499',
     tagline: 'Learn the Core Concepts of Mathematics & Machine Learning',
-    description: 'Month 3 covers statistics, probability, ML concepts, mathematics for ML, data preprocessing, and evaluation metrics; Month 4 covers supervised and unsupervised ML, regression, classification, clustering, tuning, and end-to-end ML projects.',
+    description: 'Covers statistics, probability, ML concepts, mathematics for ML, data preprocessing, evaluation metrics, supervised and unsupervised ML, regression, classification, clustering, tuning, and end-to-end ML projects.',
     features: [
-      'Month 3: Math & Statistics for ML',
+      'Math & Statistics for ML',
       'Data Preprocessing & Feature Engineering',
-      'Month 4: Supervised Learning (Regression & Classification)',
+      'Supervised Learning (Regression & Classification)',
       'Unsupervised Learning & Clustering',
       'Model Tuning, Validation & End-to-End ML Projects'
     ],
     syllabus: [
       {
-        title: 'Month 3: Math + ML Fundamentals',
+        title: 'Phase 1: Math + ML Fundamentals',
         topics: [
           'Descriptive and inferential statistics for data science',
           'Probability concepts and distributions in machine learning',
@@ -475,7 +475,7 @@ export const domainData: DomainData[] = [
         ]
       },
       {
-        title: 'Month 4: Machine Learning in Practice',
+        title: 'Phase 2: Machine Learning in Practice',
         topics: [
           'Supervised learning: Linear Regression, Ridge, and Lasso',
           'Classification: Logistic Regression, Decision Trees & Random Forests',
@@ -489,24 +489,24 @@ export const domainData: DomainData[] = [
   },
   {
     id: 'python-ai-level-3',
-    name: 'Level 3 — Advanced (Months 5–6)',
+    name: 'Level 3 — Advanced (180 Days)',
     programId: 'python-ai-ml',
     programTitle: 'Python with AI/ML',
     level: 'Advanced',
-    duration: '2 Months',
+    duration: '180 Days',
     price: '4999',
     tagline: 'Build Next-Gen AI Skills with Deep Learning and Generative AI',
-    description: 'Month 5 covers neural networks, PyTorch/TensorFlow, CNNs, RNNs, and model optimization; Month 6 covers Generative AI, LLMs, embeddings, RAG, and an end-to-end Capstone project.',
+    description: 'Covers neural networks, PyTorch/TensorFlow, CNNs, RNNs, model optimization, Generative AI, LLMs, embeddings, RAG, and an end-to-end Capstone project.',
     features: [
-      'Month 5: Neural Networks & Deep Learning Frameworks',
+      'Neural Networks & Deep Learning Frameworks',
       'Computer Vision (CNNs) & Sequence Models (RNNs)',
       'Model Optimization & Training Pipelines',
-      'Month 6: Generative AI, LLMs, Embeddings & RAG',
+      'Generative AI, LLMs, Embeddings & RAG',
       'Capstone Project: Complete End-to-End AI Solution'
     ],
     syllabus: [
       {
-        title: 'Month 5: Deep Learning',
+        title: 'Phase 1: Deep Learning',
         topics: [
           'Neural network fundamentals and multi-layer perceptrons',
           'Deep learning with PyTorch and TensorFlow frameworks',
@@ -517,7 +517,7 @@ export const domainData: DomainData[] = [
         ]
       },
       {
-        title: 'Month 6: Generative AI & Capstone Project',
+        title: 'Phase 2: Generative AI & Capstone Project',
         topics: [
           'Introduction to Large Language Models (LLMs) and transformers',
           'Embeddings, vector representations and semantic search',
@@ -530,14 +530,14 @@ export const domainData: DomainData[] = [
     ]
   },
 
-  // ── PROGRAM 4: GIT & RESUME (VALUE-ADDED, 8 WEEKS) ────────────────────────
+  // ── PROGRAM 4: GIT & RESUME (VALUE-ADDED, 60 DAYS) ────────────────────────
   {
     id: 'git-resume-program',
-    name: '8-Week Git & Career Track',
+    name: '60-Day Git & Career Track',
     programId: 'git-resume',
     programTitle: 'Git & Resume',
     level: 'Intermediate',
-    duration: '8 Weeks',
+    duration: '60 Days',
     price: '1499',
     tagline: 'Version Control Your Skills. Build Your Career.',
     description: 'Master Git from everyday commands to advanced rebasing and pull request collaboration, then craft a standout resume, optimize your LinkedIn and GitHub, and prep for interviews.',

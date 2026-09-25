@@ -175,9 +175,8 @@ const ProgramDetail = () => {
                     onClick={() => setSelectedDomain(data)}
                     className="text-left p-6 rounded-2xl glass-card flex flex-col h-full cursor-pointer hover:scale-[1.02] hover:-translate-y-1"
                   >
-                    <div className="flex justify-between items-start mb-4 w-full">
+                    <div className="mb-4">
                       <BookOpen className={`w-8 h-8 ${accentClr}`} />
-                      <span className={`text-sm font-extrabold px-3 py-1 rounded-full ${isDark ? 'bg-[#14B8A6]/10' : 'bg-[#0D9488]/10'} ${accentClr}`}>₹{data.price}</span>
                     </div>
                     <h3 className={`text-lg font-bold mb-2 ${textClr}`}>{data.name}</h3>
                     <p className={`text-sm leading-relaxed flex-grow mb-4 ${mutedClr}`}>

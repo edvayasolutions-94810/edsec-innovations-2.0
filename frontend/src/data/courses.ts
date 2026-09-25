@@ -97,23 +97,23 @@ export const courses: Course[] = [
   {
     id: 'python-ai-ml',
     title: 'Python with AI/ML',
-    duration: '6 Months',
+    duration: '180 Days',
     price: '35000',
     type: 'Certified Program',
     category: 'main',
-    description: 'Our flagship 6-month comprehensive program spanning Python programming from zero, data analysis, core machine learning, deep learning, and generative AI applications.',
-    detailedDescription: 'Designed across 3 distinct 2-month phases: Months 1–2 build your programming and data foundation with Python, OOP, NumPy, Pandas, and Matplotlib; Months 3–4 cover mathematics for ML, supervised/unsupervised machine learning, and model tuning; Months 5–6 deliver next-gen AI skills with PyTorch/TensorFlow deep learning, LLMs, RAG, and an end-to-end Capstone project.',
+    description: 'Our flagship 180-day comprehensive program spanning Python programming from zero, data analysis, core machine learning, deep learning, and generative AI applications.',
+    detailedDescription: 'Master Python and AI across 3 progressive levels: Python fundamentals, OOP, NumPy, and Pandas in Level 1 (45 Days); Math for ML, supervised/unsupervised machine learning, and model tuning in Level 2 (90 Days); and deep learning with PyTorch/TensorFlow, LLMs, RAG, and an end-to-end Capstone in Level 3 (180 Days).',
     features: [
-      'Level 1 (Months 1–2): Python Fundamentals, OOP, NumPy, Pandas & Matplotlib',
-      'Level 2 (Months 3–4): Math + ML Fundamentals, Supervised/Unsupervised ML & Tuning',
-      'Level 3 (Months 5–6): Deep Learning (PyTorch/TensorFlow), LLMs, RAG & GenAI',
+      'Level 1 (45 Days): Python Fundamentals, OOP, NumPy, Pandas & Matplotlib',
+      'Level 2 (90 Days): Math + ML Fundamentals, Supervised/Unsupervised ML & Tuning',
+      'Level 3 (180 Days): Deep Learning (PyTorch/TensorFlow), LLMs, RAG & GenAI',
       '5 Industry Project Tracks including Capstone Project',
       'MSME Recognized Certification & Career Mentorship'
     ],
     domains: [
-      'Level 1 — Basic (Months 1–2)',
-      'Level 2 — Intermediate (Months 3–4)',
-      'Level 3 — Advanced (Months 5–6)'
+      'Level 1 — Basic (45 Days)',
+      'Level 2 — Intermediate (90 Days)',
+      'Level 3 — Advanced (180 Days)'
     ],
     image: pythonAiMl,
     brochureProgramId: 'python-ai-ml',
@@ -133,21 +133,20 @@ export const courses: Course[] = [
   {
     id: 'git-resume',
     title: 'Git & Resume',
-    duration: '8 Weeks',
+    duration: '60 Days',
     price: '8000',
     type: 'Value-Added Program',
     category: 'value-added',
     description: 'Version Control Your Skills. Build Your Career. Master Git, GitHub collaboration, professional resume building, LinkedIn optimization, and technical interview preparation.',
-    detailedDescription: 'An intensive 8-week career acceleration program: Weeks 1–5 cover Git fundamentals, GitHub workflows, branching, pull requests, and advanced workflows (rebasing, stashing, cherry-picking); Weeks 6–8 transform your career presence with resume writing, LinkedIn optimization, portfolio showcases, and mock technical interview preparation.',
+    detailedDescription: 'An intensive 60-day career acceleration program: Days 1–30 cover Git fundamentals, GitHub workflows, branching, pull requests, and advanced workflows (rebasing, stashing, cherry-picking); Days 31–60 transform your career presence with resume writing, LinkedIn optimization, portfolio showcases, and mock technical interview preparation.',
     features: [
-      'Weeks 1–2: Git Fundamentals, Essential Commands & GitHub Repositories',
-      'Weeks 3–4: Branching, Merge Conflict Resolution & PR Collaboration',
-      'Week 5: Advanced Git (Stashing, Rebasing, Cherry-Picking, .gitignore)',
-      'Weeks 6–7: Resume Writing, LinkedIn Optimization & GitHub Portfolio',
-      'Week 8: Resume Polishing, Interview Preparation & Job Strategies'
+      'Days 1–15: Git Fundamentals, Essential Commands & GitHub Repositories',
+      'Days 16–30: Branching, Merge Conflict Resolution & PR Collaboration',
+      'Days 31–45: Advanced Git, Stashing, Rebasing & Project Portfolio',
+      'Days 46–60: Resume Writing, LinkedIn Optimization & Interview Strategies'
     ],
     domains: [
-      '8-Week Git & Career Track'
+      '60-Day Git & Career Track'
     ],
     image: gitResume,
     brochureProgramId: 'git-resume',

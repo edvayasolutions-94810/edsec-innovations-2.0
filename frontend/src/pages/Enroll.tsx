@@ -88,7 +88,7 @@ const Enroll = () => {
       return;
     }
     if (!formData.domainSelected) {
-      toast.error('Please select a domain track for your specialization');
+      toast.error('Please select your preferred course level');
       return;
     }
     if (!validateEmail(formData.email)) {
@@ -277,10 +277,10 @@ const Enroll = () => {
 
                   {formData.course_name && (
                     <div className="animate-fade-in-up">
-                      <label className={`block text-sm font-semibold mb-2 ${labelClr}`}>Preferred Domain *</label>
+                      <label className={`block text-sm font-semibold mb-2 ${labelClr}`}>Preferred Level *</label>
                       <Select value={formData.domainSelected || undefined} onValueChange={(value) => setFormData({ ...formData, domainSelected: value })}>
                         <SelectTrigger className={`h-12 w-full ${inputCls}`}>
-                          <SelectValue placeholder="Choose a domain" />
+                          <SelectValue placeholder="Choose your preferred level" />
                         </SelectTrigger>
                         <SelectContent className={popoverBg}>
                           {courses.find(c => c.title === formData.course_name)?.domains?.map((domain) => (

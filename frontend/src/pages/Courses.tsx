@@ -55,15 +55,10 @@ const Courses = () => {
           <p className={`text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed ${mutedClr}`}>
             Master modern tech stacks with hands-on corporate projects, one-on-one mentor guidance, and verified MSME certification.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Link to="/enroll">
               <Button size="lg" className={`h-14 px-10 font-bold border-0 rounded-full transition-all duration-300 hover:scale-105 glow-button ${btnPrimary}`}>
                 Enroll Now <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/compare">
-              <Button size="lg" className={`h-14 px-8 font-bold rounded-full transition-all duration-300 hover:scale-105 ${btnOutline}`}>
-                Compare Programs
               </Button>
             </Link>
           </div>
