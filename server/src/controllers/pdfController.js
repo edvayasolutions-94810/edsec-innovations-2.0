@@ -4,6 +4,7 @@ const path = require('path');
 const Course = require('../models/Course');
 const Syllabus = require('../models/Syllabus');
 const Student = require('../models/Student');
+const { getTransporter } = require('../utils/emailService');
 
 const escapeRegex = (str) => {
     return typeof str === 'string' ? str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
@@ -223,24 +224,12 @@ const emailAdmissionLetterPDF = async (req, res) => {
         doc.on('data', buffers.push.bind(buffers));
         doc.on('end', async () => {
             const pdfBuffer = Buffer.concat(buffers);
-            const nodemailer = require('nodemailer');
-            
-            const host = process.env.SMTP_HOST || 'smtp.ethereal.email';
-            const port = parseInt(process.env.SMTP_PORT || '587');
-            const secure = port === 465;
-            const transporter = nodemailer.createTransport({
-                host,
-                port,
-                secure,
-                auth: {
-                    user: process.env.SMTP_USER || 'dummy_user',
-                    pass: process.env.SMTP_PASS || 'dummy_pass'
-                }
-            });
+            const transporter = getTransporter();
 
             const filename = `${student.full_name.replace(/\s+/g, '_')}_Admission_Letter.pdf`;
             const mailOptions = {
-                from: `"EDSEC" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+                from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'edsecinnovations@gmail.com'}>`,
+                replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
                 to: student.email,
                 subject: '🎉 Your Official EdSec Admission Letter',
                 text: `Dear ${student.full_name},\n\nPlease find attached your official Admission Letter for the ${student.course_name} program.\n\nRegards,\nEdSec Admissions Committee`,
@@ -405,24 +394,12 @@ const emailCertificatePDF = async (req, res) => {
         doc.on('data', buffers.push.bind(buffers));
         doc.on('end', async () => {
             const pdfBuffer = Buffer.concat(buffers);
-            const nodemailer = require('nodemailer');
-            
-            const host = process.env.SMTP_HOST || 'smtp.ethereal.email';
-            const port = parseInt(process.env.SMTP_PORT || '587');
-            const secure = port === 465;
-            const transporter = nodemailer.createTransport({
-                host,
-                port,
-                secure,
-                auth: {
-                    user: process.env.SMTP_USER || 'dummy_user',
-                    pass: process.env.SMTP_PASS || 'dummy_pass'
-                }
-            });
+            const transporter = getTransporter();
 
             const filename = `${student.full_name.replace(/\s+/g, '_')}_Completion_Certificate.pdf`;
             const mailOptions = {
-                from: `"EDSEC" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+                from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'edsecinnovations@gmail.com'}>`,
+                replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
                 to: student.email,
                 subject: '🎉 Your Official EdSec Completion Certificate',
                 text: `Dear ${student.full_name},\n\nCongratulations on successfully completing the ${student.course_name} program! Please find attached your official Completion Certificate.\n\nRegards,\nEdSec Academic Committee`,

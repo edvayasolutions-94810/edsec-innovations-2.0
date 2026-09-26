@@ -13,7 +13,10 @@ const getTransporter = () => {
             auth: {
                 user: user || 'edsecinnovations@gmail.com',
                 pass: pass
-            }
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 20000
         });
     }
 
@@ -27,7 +30,10 @@ const getTransporter = () => {
         auth: {
             user: user || 'dummy_user',
             pass: pass || 'dummy_pass'
-        }
+        },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 20000
     });
 };
 
@@ -572,6 +578,7 @@ const sendDemoBookingStudentEmail = async (booking) => {
 };
 
 module.exports = {
+    getTransporter,
     sendEnrollmentEmail,
     sendAdminNotificationEmail,
     sendStudentConfirmationEmail,

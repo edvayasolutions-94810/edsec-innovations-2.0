@@ -1,6 +1,7 @@
 const Student = require('../models/Student');
 const Batch = require('../models/Batch');
 const { 
+    getTransporter,
     sendAdminNotificationEmail, 
     sendStudentConfirmationEmail,
     sendApprovalEmail,
@@ -418,19 +419,7 @@ const sendCustomEmail = async (req, res) => {
             return res.status(404).json({ message: 'Student not found' });
         }
 
-        const nodemailer = require('nodemailer');
-        const host = process.env.SMTP_HOST || 'smtp.ethereal.email';
-        const port = parseInt(process.env.SMTP_PORT || '587');
-        const secure = port === 465;
-        const transporter = nodemailer.createTransport({
-            host,
-            port,
-            secure,
-            auth: {
-                user: process.env.SMTP_USER || 'dummy_user',
-                pass: process.env.SMTP_PASS || 'dummy_pass'
-            }
-        });
+        const transporter = getTransporter();
 
         let attachments = [];
         if (attachOfferLetter) {
@@ -464,7 +453,8 @@ const sendCustomEmail = async (req, res) => {
         }
 
         const mailOptions = {
-            from: `"EDSEC" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'edsecinnovations@gmail.com'}>`,
+            replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
             to: student.email,
             subject: subject,
             text: message,
