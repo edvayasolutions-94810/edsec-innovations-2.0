@@ -12,8 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { validateEmail, validatePhone, validateRequired } from '@/utils/validation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { toast } from 'sonner';
-import { Calendar, Clock, Sparkles, CheckCircle2, User, Phone, Mail, BookOpen } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Sparkles, CheckCircle2, User, Phone, Mail, BookOpen } from 'lucide-react';
 import { courses } from '@/data/courses';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { format } from 'date-fns';
 
 const getApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
@@ -72,11 +75,22 @@ export const BookDemoModal: React.FC<BookDemoModalProps> = ({
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [preferredDate, setPreferredDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [preferredTime, setPreferredTime] = useState(TIME_SLOTS[0]);
   const [selectedProgram, setSelectedProgram] = useState(programInterest || '');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date) {
+      setPreferredDate(format(date, 'yyyy-MM-dd'));
+      setCalendarOpen(false);
+      setErrors(prev => ({ ...prev, preferredDate: '' }));
+    }
+  };
 
   const handleModalClose = (isOpenState: boolean) => {
     setOpen(isOpenState);
@@ -282,40 +296,84 @@ export const BookDemoModal: React.FC<BookDemoModalProps> = ({
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-3">
                     <div>
-                      <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                        Preferred Date *
+                      <label className={`block text-xs font-semibold mb-1 flex items-center justify-between ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                        <span>Preferred Date *</span>
+                        {preferredDate && (
+                          <span className="text-[11px] text-[#14B8A6] font-medium">
+                            {selectedDate ? format(selectedDate, 'EEEE, dd MMMM yyyy') : preferredDate}
+                          </span>
+                        )}
                       </label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-3 h-4 w-4 opacity-50" />
-                        <Input
-                          type="date"
-                          min={todayStr}
-                          value={preferredDate}
-                          onChange={(e) => setPreferredDate(e.target.value)}
-                          className={`pl-9 h-11 ${inputBg}`}
-                        />
-                      </div>
+                      <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                        <PopoverTrigger asChild>
+                          <button
+                            type="button"
+                            className={`w-full flex items-center justify-between px-3 h-11 rounded-xl text-xs font-medium border text-left transition-colors ${inputBg} ${
+                              !selectedDate ? 'text-slate-400' : isDark ? 'text-[#E6FFFA]' : 'text-[#0F172A]'
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <CalendarIcon className="h-4 w-4 text-[#14B8A6]" />
+                              {selectedDate ? format(selectedDate, 'EEE, dd MMM yyyy') : 'Click to pick date from calendar'}
+                            </span>
+                            <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                              isDark ? 'bg-[#14B8A6]/15 text-[#2DD4BF]' : 'bg-[#0D9488]/10 text-[#0D9488]'
+                            }`}>
+                              Pick Date
+                            </span>
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className={`w-auto p-2 border rounded-2xl shadow-2xl z-50 ${isDark ? 'bg-[#0B0F0F] border-[rgba(20,184,166,0.3)] text-[#E6FFFA]' : 'bg-white border-slate-200 text-slate-800'}`} align="start">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={handleDateSelect}
+                            disabled={(date) => {
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0);
+                              return date < today;
+                            }}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                       {errors.preferredDate && <p className="text-[11px] text-red-400 mt-1">{errors.preferredDate}</p>}
                     </div>
 
                     <div>
-                      <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-                        Preferred Slot *
+                      <label className={`block text-xs font-semibold mb-1.5 flex items-center justify-between ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                        <span className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-[#14B8A6]" /> Preferred Time Slot *
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-normal">IST (GMT+5:30)</span>
                       </label>
-                      <Select value={preferredTime} onValueChange={setPreferredTime}>
-                        <SelectTrigger className={`h-11 w-full ${inputBg}`}>
-                          <SelectValue placeholder="Choose time slot" />
-                        </SelectTrigger>
-                        <SelectContent className={isDark ? 'bg-[#0B0F0F] border-[rgba(20,184,166,0.2)] text-[#E6FFFA]' : 'bg-white'}>
-                          {TIME_SLOTS.map((slot) => (
-                            <SelectItem key={slot} value={slot}>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {TIME_SLOTS.map((slot) => {
+                          const isSelected = preferredTime === slot;
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => {
+                                setPreferredTime(slot);
+                                setErrors(prev => ({ ...prev, preferredTime: '' }));
+                              }}
+                              className={`py-2 px-2 rounded-lg text-[11px] font-semibold text-center border transition-all ${
+                                isSelected
+                                  ? 'bg-[#14B8A6] text-white border-[#14B8A6] shadow-sm shadow-[#14B8A6]/30'
+                                  : isDark
+                                  ? 'bg-[#121818] border-[rgba(20,184,166,0.2)] text-slate-300 hover:border-[#14B8A6]/50 hover:bg-[#14B8A6]/5'
+                                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-[#0D9488]/40 hover:bg-slate-100'
+                              }`}
+                            >
                               {slot}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {errors.preferredTime && <p className="text-[11px] text-red-400 mt-1">{errors.preferredTime}</p>}
                     </div>
                   </div>
 

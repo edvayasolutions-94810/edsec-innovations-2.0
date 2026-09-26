@@ -37,19 +37,34 @@ const getTransporter = () => {
     });
 };
 
+const sanitizeEmail = (emailStr, fallback = 'edsecinnovations@gmail.com') => {
+    if (!emailStr) return fallback;
+    const match = emailStr.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    return match ? match[0].trim().toLowerCase() : fallback;
+};
+
+const getAdminEmailList = () => {
+    const raw = process.env.ADMIN_EMAIL || '';
+    const matches = raw.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
+    const defaults = ['edsecinnovations@gmail.com', 'edvayasolutions@gmail.com'];
+    const combined = Array.from(new Set([...matches.map(m => m.trim().toLowerCase()), ...defaults]));
+    return combined.join(', ');
+};
+
 /**
  * Send an email notification to the Admin with a professional details table.
  */
 const sendAdminNotificationEmail = async (student) => {
     try {
         const transporter = getTransporter();
-        const adminEmail = process.env.ADMIN_EMAIL || 'edsecinnovations@gmail.com';
+        const adminEmail = getAdminEmailList();
         const dateStr = student.enrollment_date 
             ? new Date(student.enrollment_date).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
             : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${sanitizeEmail(process.env.SMTP_USER, 'edvayasolutions@gmail.com')}>`,
+            replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
             to: adminEmail,
             subject: `New Student Enrollment – EdSec Innovations`,
             html: `
@@ -454,13 +469,14 @@ EdSec Innovations Team`,
 const sendDemoBookingAdminEmail = async (booking) => {
     try {
         const transporter = getTransporter();
-        const adminEmail = process.env.ADMIN_EMAIL || 'edsecinnovations@gmail.com';
+        const adminEmail = getAdminEmailList();
         const dateStr = booking.createdAt 
             ? new Date(booking.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
             : new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${sanitizeEmail(process.env.SMTP_USER, 'edvayasolutions@gmail.com')}>`,
+            replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
             to: adminEmail,
             subject: `✨ New Demo Class Request – ${booking.name} (${booking.preferredDate})`,
             html: `
@@ -532,8 +548,8 @@ const sendDemoBookingStudentEmail = async (booking) => {
     try {
         const transporter = getTransporter();
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'edsecinnovations@gmail.com'}>`,
-            replyTo: `"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>`,
+            from: `"EDSEC INNOVATIONS" <${sanitizeEmail(process.env.SMTP_USER, 'edvayasolutions@gmail.com')}>`,
+            replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
             to: booking.email,
             subject: `🎉 Free Demo Class Scheduled – EdSec Innovations`,
             html: `

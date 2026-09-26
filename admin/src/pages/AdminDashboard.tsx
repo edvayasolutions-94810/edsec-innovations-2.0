@@ -1368,7 +1368,7 @@ const AdminDashboard = () => {
                         <button
                             onClick={() => {
                                 setActiveTab('demos');
-                                if (!demoBookings.length) fetchDemoBookings();
+                                fetchDemoBookings(false);
                             }}
                             className={`px-4 py-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition-all shrink-0 ${
                                 activeTab === 'demos'
