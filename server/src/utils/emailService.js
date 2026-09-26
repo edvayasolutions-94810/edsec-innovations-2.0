@@ -136,7 +136,8 @@ const sendStudentConfirmationEmail = async (student) => {
     try {
         const transporter = getTransporter();
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'edsecinnovations@gmail.com'}>`,
+            replyTo: `"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>`,
             to: student.email,
             subject: `🎉 Congratulations! Your Enrollment Application is Received – EdSec Innovations`,
             text: `Dear ${student.full_name},
@@ -210,7 +211,8 @@ const sendApprovalEmail = async (student) => {
     try {
         const transporter = getTransporter();
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'edsecinnovations@gmail.com'}>`,
+            replyTo: `"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>`,
             to: student.email,
             subject: `🎉 Congratulations! Your Enrollment Has Been Approved`,
             html: `
@@ -524,7 +526,8 @@ const sendDemoBookingStudentEmail = async (booking) => {
     try {
         const transporter = getTransporter();
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'edsecinnovations@gmail.com'}>`,
+            replyTo: `"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>`,
             to: booking.email,
             subject: `🎉 Free Demo Class Scheduled – EdSec Innovations`,
             html: `
