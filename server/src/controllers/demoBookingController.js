@@ -33,39 +33,34 @@ const submitDemoBooking = async (req, res) => {
 
         await booking.save();
 
-        // 1. Send Admin WhatsApp Notification (non-blocking)
-        try {
-            await sendDemoBookingWhatsAppNotification(booking);
-        } catch (waErr) {
-            console.error('Demo Booking Admin WhatsApp Error:', waErr.message);
-        }
-
-        // 2. Send Student WhatsApp Confirmation (non-blocking)
-        try {
-            await sendDemoBookingUserWhatsAppConfirmation(booking);
-        } catch (waErr) {
-            console.error('Demo Booking User WhatsApp Error:', waErr.message);
-        }
-
-        // 3. Send Admin Email Notification (non-blocking)
-        try {
-            await sendDemoBookingAdminEmail(booking);
-        } catch (mailErr) {
-            console.error('Demo Booking Admin Email Error:', mailErr.message);
-        }
-
-        // 4. Send Student Email Confirmation (non-blocking)
-        try {
-            await sendDemoBookingStudentEmail(booking);
-        } catch (mailErr) {
-            console.error('Demo Booking Student Email Error:', mailErr.message);
-        }
-
+        // Respond immediately to the student so UI is instant (<250ms)
         res.status(201).json({
             success: true,
             message: "Thanks! We'll confirm your demo slot shortly.",
             booking
         });
+
+        // Trigger notifications concurrently in the background without blocking the client
+        (async () => {
+            try {
+                await Promise.allSettled([
+                    sendDemoBookingWhatsAppNotification(booking).catch(e => 
+                        console.error('Demo Booking Admin WhatsApp Error:', e.message)
+                    ),
+                    sendDemoBookingUserWhatsAppConfirmation(booking).catch(e => 
+                        console.error('Demo Booking User WhatsApp Error:', e.message)
+                    ),
+                    sendDemoBookingAdminEmail(booking).catch(e => 
+                        console.error('Demo Booking Admin Email Error:', e.message)
+                    ),
+                    sendDemoBookingStudentEmail(booking).catch(e => 
+                        console.error('Demo Booking Student Email Error:', e.message)
+                    )
+                ]);
+            } catch (bgErr) {
+                console.error('Demo booking background notification error:', bgErr.message);
+            }
+        })();
     } catch (err) {
         console.error('Error submitting demo booking:', err);
         res.status(500).json({ message: 'Server error while scheduling demo class.' });
