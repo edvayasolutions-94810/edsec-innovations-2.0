@@ -43,3 +43,18 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
+  # Admin Portal Static Site
+  - type: web
+    name: edsec-admin
+    env: static
+    rootDir: admin
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://edsec-innovations.onrender.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
