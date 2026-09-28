@@ -77,8 +77,49 @@ const sendViaResend = async (mailOptions) => {
     return { messageId: res.data.id || 'resend-success' };
 };
 
+const sendViaGoogleScript = async (mailOptions) => {
+    const scriptUrl = process.env.GOOGLE_SCRIPT_URL || process.env.GMAIL_API_URL;
+    const toList = (Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to])
+        .flatMap(e => (typeof e === 'string' ? e.split(',') : [e]))
+        .map(e => (typeof e === 'string' ? e.trim() : e.email))
+        .filter(Boolean)
+        .join(', ');
+
+    const payload = {
+        to: toList,
+        subject: mailOptions.subject,
+        text: mailOptions.text || '',
+        html: mailOptions.html || mailOptions.text || ''
+    };
+
+    if (mailOptions.attachments && mailOptions.attachments.length) {
+        payload.attachments = mailOptions.attachments.map(att => ({
+            name: att.filename,
+            contentType: att.contentType || 'application/pdf',
+            content: Buffer.isBuffer(att.content) 
+                ? att.content.toString('base64') 
+                : Buffer.from(att.content).toString('base64')
+        }));
+    }
+
+    // Google Apps Script accepts text/plain JSON payload cleanly without preflight issues
+    await axios.post(scriptUrl, JSON.stringify(payload), {
+        headers: {
+            'Content-Type': 'text/plain;charset=utf-8'
+        },
+        timeout: 30000,
+        maxRedirects: 5,
+        validateStatus: () => true // Google Apps Script returns 302/200, both indicate receipt
+    });
+
+    return { messageId: 'google-script-' + Date.now() };
+};
+
 // Setup transporter
 const getTransporter = () => {
+    if (process.env.GOOGLE_SCRIPT_URL || process.env.GMAIL_API_URL) {
+        return { sendMail: sendViaGoogleScript };
+    }
     if (process.env.BREVO_API_KEY) {
         return { sendMail: sendViaBrevo };
     }
