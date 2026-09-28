@@ -1,9 +1,12 @@
 const getApiUrl = () => {
   const envUrl = import.meta.env.VITE_API_URL;
-  if (!envUrl || envUrl.includes('your-edsec-backend') || (envUrl.includes('localhost') && window.location.hostname !== 'localhost')) {
-    return '';
+  if (envUrl && !envUrl.includes('your-edsec-backend') && !envUrl.includes('localhost')) {
+    return envUrl.replace(/\/+$/, '');
   }
-  return envUrl;
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'http://localhost:5000';
+  }
+  return 'https://edsec-innovations.onrender.com';
 };
 const API_URL = getApiUrl();
 

@@ -2,34 +2,22 @@ const nodemailer = require('nodemailer');
 
 // Setup transporter
 const getTransporter = () => {
-    const host = process.env.SMTP_HOST || '';
-    const user = process.env.SMTP_USER || '';
-    const pass = process.env.SMTP_PASS || '';
+    let host = process.env.SMTP_HOST || 'smtp.gmail.com';
+    let user = sanitizeEmail(process.env.SMTP_USER, 'edvayasolutions@gmail.com');
+    let pass = (process.env.SMTP_PASS || '').trim().replace(/\s+/g, '');
 
-    // If using Gmail, use nodemailer's built-in gmail service configuration
-    if (host.includes('gmail') || user.endsWith('@gmail.com') || process.env.SMTP_SERVICE === 'gmail') {
-        return nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: user || 'edsecinnovations@gmail.com',
-                pass: pass
-            },
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 20000
-        });
+    // If SMTP_PASS is missing, or is the plain password 'Ed@8660132700', or invalid for Google:
+    // Fall back to the verified Google App Password so emails never fail
+    if (!pass || pass.includes('8660132700') || pass === 'Ed@8660132700' || (user.includes('edsec') && pass.length < 16)) {
+        user = 'edvayasolutions@gmail.com';
+        pass = 'qxbdpjlymcsfymtx';
     }
 
-    const port = parseInt(process.env.SMTP_PORT || '587');
-    const secure = port === 465;
-
     return nodemailer.createTransport({
-        host: host || 'smtp.ethereal.email',
-        port,
-        secure,
+        service: 'gmail',
         auth: {
-            user: user || 'dummy_user',
-            pass: pass || 'dummy_pass'
+            user,
+            pass
         },
         connectionTimeout: 10000,
         greetingTimeout: 10000,
@@ -232,8 +220,8 @@ const sendApprovalEmail = async (student) => {
     try {
         const transporter = getTransporter();
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'edsecinnovations@gmail.com'}>`,
-            replyTo: `"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>`,
+            from: `"EDSEC INNOVATIONS" <${sanitizeEmail(process.env.SMTP_USER, 'edvayasolutions@gmail.com')}>`,
+            replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
             to: student.email,
             subject: `🎉 Congratulations! Your Enrollment Has Been Approved`,
             html: `
@@ -269,7 +257,8 @@ const sendRejectionEmail = async (student) => {
     try {
         const transporter = getTransporter();
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${sanitizeEmail(process.env.SMTP_USER, 'edvayasolutions@gmail.com')}>`,
+            replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
             to: student.email,
             subject: `Application Status Update – EdSec Innovations`,
             html: `
@@ -298,7 +287,8 @@ const sendOnHoldEmail = async (student) => {
     try {
         const transporter = getTransporter();
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${sanitizeEmail(process.env.SMTP_USER, 'edvayasolutions@gmail.com')}>`,
+            replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
             to: student.email,
             subject: `Application Under Review – EdSec Innovations`,
             html: `
@@ -325,11 +315,12 @@ const sendOnHoldEmail = async (student) => {
 const sendContactAdminEmail = async (contact) => {
     try {
         const transporter = getTransporter();
-        const adminEmail = process.env.ADMIN_EMAIL || 'edsecinnovations@gmail.com';
+        const adminEmail = getAdminEmailList();
         const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
 
         const mailOptions = {
-            from: `"EDSEC INNOVATIONS" <${process.env.SMTP_USER || 'noreply@edsecinnovations.com'}>`,
+            from: `"EDSEC INNOVATIONS" <${sanitizeEmail(process.env.SMTP_USER, 'edvayasolutions@gmail.com')}>`,
+            replyTo: '"EDSEC INNOVATIONS" <edsecinnovations@gmail.com>',
             to: adminEmail,
             subject: `New Contact Form Submission – EdSec Innovations`,
             html: `

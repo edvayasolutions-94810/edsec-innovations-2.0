@@ -18,10 +18,13 @@ import {
 
 const getApiUrl = () => {
     const envUrl = import.meta.env.VITE_API_URL;
-    if (!envUrl || envUrl.includes('your-edsec-backend') || (envUrl.includes('localhost') && window.location.hostname !== 'localhost')) {
-        return '/api';
+    if (envUrl && !envUrl.includes('your-edsec-backend') && !envUrl.includes('localhost')) {
+        return envUrl.replace(/\/+$/, '') + '/api';
     }
-    return envUrl + '/api';
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+        return 'http://localhost:5000/api';
+    }
+    return 'https://edsec-innovations.onrender.com/api';
 };
 const API_URL = getApiUrl();
 
