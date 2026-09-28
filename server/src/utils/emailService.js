@@ -77,8 +77,10 @@ const sendViaResend = async (mailOptions) => {
     return { messageId: res.data.id || 'resend-success' };
 };
 
+const SCRIPT_URL_FALLBACK = 'https://script.google.com/macros/s/AKfycbxVpBIlSeCoU84W-iPiXw7cHviXOK-rE7MbVZYYEA_ZqG3KKPac9utcKPbkVt43eaEq/exec';
+
 const sendViaGoogleScript = async (mailOptions) => {
-    const scriptUrl = process.env.GOOGLE_SCRIPT_URL || process.env.GMAIL_API_URL;
+    const scriptUrl = process.env.GOOGLE_SCRIPT_URL || process.env.GMAIL_API_URL || SCRIPT_URL_FALLBACK;
     const toList = (Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to])
         .flatMap(e => (typeof e === 'string' ? e.split(',') : [e]))
         .map(e => (typeof e === 'string' ? e.trim() : e.email))
@@ -102,22 +104,27 @@ const sendViaGoogleScript = async (mailOptions) => {
         }));
     }
 
-    // Google Apps Script accepts text/plain JSON payload cleanly without preflight issues
-    await axios.post(scriptUrl, JSON.stringify(payload), {
-        headers: {
-            'Content-Type': 'text/plain;charset=utf-8'
-        },
-        timeout: 30000,
-        maxRedirects: 5,
-        validateStatus: () => true // Google Apps Script returns 302/200, both indicate receipt
-    });
-
-    return { messageId: 'google-script-' + Date.now() };
+    try {
+        const res = await axios.post(scriptUrl, JSON.stringify(payload), {
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8'
+            },
+            timeout: 35000,
+            maxRedirects: 5,
+            validateStatus: () => true
+        });
+        console.log('Google Script Email Response status:', res.status);
+        return { messageId: 'google-script-' + Date.now() };
+    } catch (err) {
+        console.error('Google Script Email Error:', err.message);
+        throw err;
+    }
 };
 
 // Setup transporter
 const getTransporter = () => {
-    if (process.env.GOOGLE_SCRIPT_URL || process.env.GMAIL_API_URL) {
+    const scriptUrl = process.env.GOOGLE_SCRIPT_URL || process.env.GMAIL_API_URL || SCRIPT_URL_FALLBACK;
+    if (scriptUrl) {
         return { sendMail: sendViaGoogleScript };
     }
     if (process.env.BREVO_API_KEY) {
