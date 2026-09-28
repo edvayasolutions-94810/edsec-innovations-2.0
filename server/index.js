@@ -2,6 +2,18 @@ const dns = require('dns');
 if (dns.setDefaultResultOrder) {
     dns.setDefaultResultOrder('ipv4first');
 }
+const _origLookup = dns.lookup;
+dns.lookup = function(hostname, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = { family: 4 };
+    } else if (typeof options === 'object' && options) {
+        options.family = 4;
+    } else {
+        options = { family: 4 };
+    }
+    return _origLookup.call(dns, hostname, options, callback);
+};
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');

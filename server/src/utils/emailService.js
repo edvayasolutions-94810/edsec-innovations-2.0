@@ -22,12 +22,16 @@ const getTransporter = () => {
         host: 'smtp.gmail.com',
         port: 587,
         secure: false, // TLS on port 587
-        family: 4, // Strict IPv4 to eliminate Render ENETUNREACH
+        family: 4, // Strict IPv4
+        lookup: (hostname, options, callback) => {
+            return dns.lookup(hostname, { family: 4 }, callback);
+        },
         auth: {
             user,
             pass
         },
         tls: {
+            servername: 'smtp.gmail.com',
             rejectUnauthorized: false
         },
         connectionTimeout: 15000,
