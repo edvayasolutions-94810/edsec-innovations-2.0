@@ -4,6 +4,9 @@ const nodemailer = require('nodemailer');
 const getTransporter = () => {
     let host = process.env.SMTP_HOST || 'smtp.gmail.com';
     let user = sanitizeEmail(process.env.SMTP_USER, 'edsecinnovations@gmail.com');
+    if (user.includes('edvayasolutions')) {
+        user = 'edsecinnovations@gmail.com';
+    }
     let pass = (process.env.SMTP_PASS || '').trim().replace(/\s+/g, '');
 
     // Verified Google App Password for edsecinnovations@gmail.com
