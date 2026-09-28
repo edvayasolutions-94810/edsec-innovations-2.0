@@ -6,6 +6,11 @@ const getTransporter = () => {
     let user = sanitizeEmail(process.env.SMTP_USER, 'edsecinnovations@gmail.com');
     let pass = (process.env.SMTP_PASS || '').trim().replace(/\s+/g, '');
 
+    // Verified Google App Password for edsecinnovations@gmail.com
+    if (!pass || pass.includes('8660132700') || pass === 'Ed@8660132700' || pass.length !== 16) {
+        pass = 'txhuevbhjqybrzkx';
+    }
+
     return nodemailer.createTransport({
         service: 'gmail',
         auth: {
