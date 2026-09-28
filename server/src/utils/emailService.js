@@ -1,3 +1,7 @@
+const dns = require('dns');
+if (dns.setDefaultResultOrder) {
+    dns.setDefaultResultOrder('ipv4first');
+}
 const nodemailer = require('nodemailer');
 
 // Setup transporter
@@ -15,14 +19,20 @@ const getTransporter = () => {
     }
 
     return nodemailer.createTransport({
-        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false, // TLS on port 587
+        family: 4, // Strict IPv4 to eliminate Render ENETUNREACH
         auth: {
             user,
             pass
         },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 20000
+        tls: {
+            rejectUnauthorized: false
+        },
+        connectionTimeout: 15000,
+        greetingTimeout: 15000,
+        socketTimeout: 30000
     });
 };
 
