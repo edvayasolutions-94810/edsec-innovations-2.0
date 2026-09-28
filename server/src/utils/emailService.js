@@ -3,9 +3,89 @@ if (dns.setDefaultResultOrder) {
     dns.setDefaultResultOrder('ipv4first');
 }
 const nodemailer = require('nodemailer');
+const axios = require('axios');
+
+// HTTP Email Dispatchers (Bypasses Render outbound SMTP port blocking on ports 25, 465, 587)
+const sendViaBrevo = async (mailOptions) => {
+    const apiKey = process.env.BREVO_API_KEY;
+    const toEmails = (Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to])
+        .flatMap(e => (typeof e === 'string' ? e.split(',') : [e]))
+        .map(e => (typeof e === 'string' ? e.trim() : e.email))
+        .filter(Boolean)
+        .map(email => ({ email }));
+
+    const payload = {
+        sender: { name: 'EDSEC INNOVATIONS', email: 'edsecinnovations@gmail.com' },
+        to: toEmails,
+        subject: mailOptions.subject,
+        htmlContent: mailOptions.html || mailOptions.text || '<p></p>',
+        textContent: mailOptions.text || undefined,
+        replyTo: { email: 'edsecinnovations@gmail.com', name: 'EDSEC INNOVATIONS' }
+    };
+
+    if (mailOptions.attachments && mailOptions.attachments.length) {
+        payload.attachment = mailOptions.attachments.map(att => ({
+            name: att.filename,
+            content: Buffer.isBuffer(att.content) 
+                ? att.content.toString('base64') 
+                : Buffer.from(att.content).toString('base64')
+        }));
+    }
+
+    const res = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
+        headers: {
+            'api-key': apiKey,
+            'Content-Type': 'application/json'
+        },
+        timeout: 20000
+    });
+    return { messageId: res.data.messageId || 'brevo-success' };
+};
+
+const sendViaResend = async (mailOptions) => {
+    const apiKey = process.env.RESEND_API_KEY;
+    const toList = (Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to])
+        .flatMap(e => (typeof e === 'string' ? e.split(',') : [e]))
+        .map(e => (typeof e === 'string' ? e.trim() : e.email))
+        .filter(Boolean);
+
+    const payload = {
+        from: process.env.RESEND_FROM || 'EDSEC INNOVATIONS <onboarding@resend.dev>',
+        to: toList,
+        subject: mailOptions.subject,
+        html: mailOptions.html || mailOptions.text,
+        text: mailOptions.text,
+        reply_to: 'edsecinnovations@gmail.com'
+    };
+
+    if (mailOptions.attachments && mailOptions.attachments.length) {
+        payload.attachments = mailOptions.attachments.map(att => ({
+            filename: att.filename,
+            content: Buffer.isBuffer(att.content) 
+                ? att.content.toString('base64') 
+                : Buffer.from(att.content).toString('base64')
+        }));
+    }
+
+    const res = await axios.post('https://api.resend.com/emails', payload, {
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        },
+        timeout: 20000
+    });
+    return { messageId: res.data.id || 'resend-success' };
+};
 
 // Setup transporter
 const getTransporter = () => {
+    if (process.env.BREVO_API_KEY) {
+        return { sendMail: sendViaBrevo };
+    }
+    if (process.env.RESEND_API_KEY) {
+        return { sendMail: sendViaResend };
+    }
+
     let host = process.env.SMTP_HOST || 'smtp.gmail.com';
     let user = sanitizeEmail(process.env.SMTP_USER, 'edsecinnovations@gmail.com');
     if (user.includes('edvayasolutions')) {
