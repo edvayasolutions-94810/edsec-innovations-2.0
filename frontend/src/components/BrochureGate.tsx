@@ -203,8 +203,8 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
       setStep('success');
       toast.success('Verification successful! Starting download...');
 
-      // Immediately trigger single-use download
-      await triggerDownload(token);
+      // Immediately trigger single-use download directly via browser
+      triggerDownload(token);
 
       // Automatically close modal after download starts
       setTimeout(() => {
@@ -217,29 +217,19 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
     }
   };
 
-  // Helper to fetch file via validated single-use token and save blob
-  const triggerDownload = async (token: string) => {
+  // Helper to trigger direct native browser download via validated single-use token
+  const triggerDownload = (token: string) => {
     try {
       const downloadUrl = `${API_URL}/brochures/download?token=${encodeURIComponent(token)}`;
-      const res = await fetch(downloadUrl);
-
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.message || 'Download token rejected.');
-      }
-
-      const blob = await res.blob();
-      const objectUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = objectUrl;
-      link.download = `${programId}-brochure.pdf`;
+      link.href = downloadUrl;
+      link.setAttribute('download', `${programId}-brochure.pdf`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(objectUrl);
     } catch (err: any) {
       console.error('Download error:', err);
-      toast.error(err.message || 'Failed to download brochure file.');
+      toast.error('Failed to start brochure download.');
     }
   };
 

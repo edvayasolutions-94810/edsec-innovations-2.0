@@ -317,10 +317,15 @@ const downloadBrochure = async (req, res) => {
             });
         }
 
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        const fileStream = fs.createReadStream(filePath);
-        fileStream.pipe(res);
+        return res.download(filePath, filename, (err) => {
+            if (err && !res.headersSent) {
+                console.error('Error during brochure download stream:', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Server error while streaming brochure.'
+                });
+            }
+        });
     } catch (error) {
         console.error('Error in downloadBrochure:', error);
         return res.status(500).json({
