@@ -105,7 +105,7 @@ const requestOtp = async (req, res) => {
         if (!otpResult.success) {
             return res.status(400).json({
                 success: false,
-                message: otpResult.message || 'Failed to dispatch verification SMS. Please check your mobile number.'
+                message: otpResult.message || 'Failed to dispatch verification code. Please check your mobile number.'
             });
         }
 
@@ -132,7 +132,7 @@ const requestOtp = async (req, res) => {
             success: true,
             sessionId: otpResult.sessionId,
             phone: cleanPhone,
-            message: `Verification code sent via SMS to +91 ${cleanPhone.slice(0, 2)}******${cleanPhone.slice(-2)}.`
+            message: `Verification call dispatched to +91 ${cleanPhone.slice(0, 2)}******${cleanPhone.slice(-2)}. Please answer the call to hear your code.`
         });
     } catch (error) {
         console.error('Error in requestOtp:', error);

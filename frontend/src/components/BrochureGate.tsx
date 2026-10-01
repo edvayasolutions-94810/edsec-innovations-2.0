@@ -145,7 +145,7 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
       const data = await response.json();
 
       if (!response.ok) {
-        setErrors({ general: data.message || 'Unable to dispatch verification SMS. Please verify your mobile number.' });
+        setErrors({ general: data.message || 'Unable to initiate verification call. Please verify your mobile number.' });
         return;
       }
 
@@ -155,7 +155,7 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
 
       setStep('otp');
       setCooldown(60);
-      toast.success(data.message || 'Verification code sent via SMS!');
+      toast.success(data.message || 'You will receive an automated call with your verification code shortly.');
     } catch (err: any) {
       setErrors({ general: 'Network error. Please check your connection and try again.' });
     } finally {
@@ -291,9 +291,9 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
             </div>
             <DialogDescription className={isDark ? 'text-slate-400' : 'text-slate-500'}>
               {step === 'form' &&
-                'Enter your contact details to receive a 6-digit SMS verification code on your mobile phone.'}
+                'Enter your contact details to receive a 6-digit verification code via an automated phone call.'}
               {step === 'otp' &&
-                `We've sent a 6-digit SMS code to +91 ${phone.slice(0, 2)}******${phone.slice(-2)}. Enter it below to unlock your brochure.`}
+                `Please answer the incoming call on +91 ${phone.slice(0, 2)}******${phone.slice(-2)} to hear your 6-digit verification code. Enter it below to unlock your brochure.`}
               {step === 'success' && 'Verification confirmed! Your brochure download is starting now.'}
             </DialogDescription>
           </DialogHeader>
@@ -360,7 +360,7 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
                   <Label htmlFor="lead-phone" className="text-xs font-bold uppercase tracking-wider">
                     Mobile Number
                   </Label>
-                  <span className="text-[10px] font-semibold text-teal-500">SMS Verification</span>
+                  <span className="text-[10px] font-semibold text-teal-500">Phone Call Verification</span>
                 </div>
                 <div className="relative mt-1.5">
                   <span className="absolute left-3 top-3 text-xs font-bold opacity-60">+91</span>
@@ -389,11 +389,11 @@ export const BrochureGate: React.FC<BrochureGateProps> = ({
               >
                 {loading ? (
                   <>
-                    <RefreshCw className="h-4 w-4 animate-spin" /> Sending SMS OTP...
+                    <RefreshCw className="h-4 w-4 animate-spin" /> Calling your phone...
                   </>
                 ) : (
                   <>
-                    Send SMS Verification Code <ArrowRight className="h-4 w-4" />
+                    Receive Verification Call <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </Button>
